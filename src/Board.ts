@@ -2,9 +2,9 @@ import Square from './Square';
 import Color, { ColorWhite, ColorBlack } from './Color';
 import Player from './Player';
 import { SideBottom, SideTop } from './Side';
-// import { King, Pawn } from './pieces';
 import King from './pieces/King';
 import Pawn from './pieces/Pawn';
+import { BoardState } from './State';
 
 export default class Board {
   /**
@@ -27,6 +27,14 @@ export default class Board {
    * the second player
    */
   private player2: Player;
+  /**
+   * round
+   */
+  private _turn: number = 1;
+  /**
+   * current player
+   */
+  private _currentPlayer: Player;
 
   constructor() {
     const num: number = this.width * this.height;
@@ -51,6 +59,7 @@ export default class Board {
 
     this.player1 = new Player(ColorWhite, SideBottom, this);
     this.player2 = new Player(ColorBlack, SideTop, this);
+    this._currentPlayer = this.player1;
     this.initPieces(this.player1);
     this.initPieces(this.player2);
   }
@@ -83,5 +92,19 @@ export default class Board {
     const x = name.toLowerCase().charCodeAt(0) - 97;
     const y = parseInt(name.charAt(1), 10) - 1;
     return this.getSquare(x, y);
+  }
+
+  /**
+   * returns the state of the Board
+   * @returns {BoardState}
+   */
+  public getState(): BoardState {
+    return {
+      turn: this._turn,
+      currentPlayer:
+        this._currentPlayer === this.player1 ? 'player1' : 'player2',
+      player1: this.player1.getState(),
+      player2: this.player1.getState(),
+    };
   }
 }

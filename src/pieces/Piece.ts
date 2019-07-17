@@ -3,6 +3,7 @@ import Player from '../Player';
 import Movement from '../Movement';
 import Square from '../Square';
 import Board from '../Board';
+import { PieceState } from '../State';
 
 export default class Piece {
   /**
@@ -85,7 +86,6 @@ export default class Piece {
     let repeat: number = 0;
     let hypothetic: Square = null;
     this.movements.forEach((movement: Movement) => {
-      console.log(movement);
       repeat = 0;
       hypothetic = this.square;
       while (repeat < movement.repeat) {
@@ -125,5 +125,17 @@ export default class Piece {
     });
 
     return squares;
+  }
+
+  /**
+   * returns the state of this Piece
+   * @returns {PieceState}
+   */
+  public getState(): PieceState {
+    return {
+      type: this.type.name,
+      x: this.square ? this.square.x : null,
+      y: this.square ? this.square.y : null,
+    };
   }
 }

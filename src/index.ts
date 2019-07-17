@@ -13,3 +13,5 @@ console.log('valid moves :', moves, 'total :', moves.length);
 console.log('enemy moves: ', board.getSquare(4, 7).piece.getValidMoves());
 
 console.log('pawn moves: ', board.getSquare(4, 1).piece.getValidMoves());
+
+console.log(board.getState());

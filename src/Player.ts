@@ -3,6 +3,7 @@ import Side from './Side';
 import Board from './Board';
 import Piece from './pieces/Piece';
 import Square from './Square';
+import { PlayerState } from './State';
 
 export default class Player {
   public readonly color: Color;
@@ -35,5 +36,17 @@ export default class Player {
     piece.square = square;
     piece.player = this;
     return piece;
+  }
+
+  /**
+   * returns the state of this Player
+   * @returns {PlayerState}
+   */
+  public getState(): PlayerState {
+    return {
+      color: this.color.name,
+      side: this.side.name,
+      pieces: this._pieces.map(piece => piece.getState()),
+    };
   }
 }
