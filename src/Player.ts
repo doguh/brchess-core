@@ -2,6 +2,7 @@ import Color from './Color';
 import Side from './Side';
 import Board from './Board';
 import Piece from './pieces';
+import Square from './Square';
 
 export default class Player {
   public readonly color: Color;
@@ -15,12 +16,24 @@ export default class Player {
     this.board = board;
   }
 
+  /**
+   * list the pieces owned by this player
+   * @returns {Piece[]}
+   */
   public get pieces(): Readonly<Piece[]> {
     return this._pieces;
   }
 
-  public addPiece(piece: Piece): Player {
+  /**
+   * adds a piece to the player's collection
+   * @param piece the piece to add
+   * @param square the square where the piece should be added
+   * @returns {Piece} the added piece
+   */
+  public addPiece(piece: Piece, square: Square): Piece {
     this._pieces.push(piece);
-    return this;
+    piece.square = square;
+    piece.player = this;
+    return piece;
   }
 }

@@ -10,27 +10,17 @@ export default class Piece {
    */
   public readonly type: PieceType;
   /**
-   * player who owns this piece
-   */
-  public readonly player: Player;
-  /**
    * list of possible movements
    */
   public readonly movements: Movement[];
 
   private _square: Square;
   private _moveCount: number = 0;
+  private _player: Player = null;
 
-  constructor(
-    type: PieceType,
-    player: Player,
-    movements: Movement[],
-    square: Square
-  ) {
+  constructor(type: PieceType, movements: Movement[]) {
     this.type = type;
-    this.player = player;
     this.movements = movements;
-    this.square = square;
   }
 
   /**
@@ -69,6 +59,21 @@ export default class Piece {
   }
 
   /**
+   * the player who owns this piece
+   * @returns {Player}
+   */
+  public get player(): Player {
+    return this._player;
+  }
+
+  public set player(player: Player) {
+    if (this._player) {
+      throw new Error("Trying to change a piece's player");
+    }
+    this._player = player;
+  }
+
+  /**
    * list all squares where this piece can move to
    * @return {Square[]}
    */
@@ -83,8 +88,8 @@ export default class Piece {
       repeat = 0;
       hypothetic = this.square;
       while (repeat < movement.repeat) {
-        x = this.square.x + movement.x;
-        y = this.square.y + movement.y;
+        x = this.square.x + movement.x * this.player.side.x;
+        y = this.square.y + movement.y * this.player.side.y;
         hypothetic = this.board.getSquare(x, y);
         if (
           // si la case existe

@@ -55,7 +55,7 @@ export default class Board {
 
   private initPieces(player: Player): void {
     const headsRank = player.side === SideBottom ? 0 : 7;
-    player.addPiece(new King(player, this.getSquare(4, headsRank)));
+    player.addPiece(new King(), this.getSquare(4, headsRank));
     const pawnsRank = player.side === SideBottom ? 1 : 6;
     for (let i = 1; i <= 8; i++) {}
   }
