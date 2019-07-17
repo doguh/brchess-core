@@ -136,6 +136,7 @@ export default class Piece {
       type: this.type.name,
       x: this.square ? this.square.x : null,
       y: this.square ? this.square.y : null,
+      moveCount: this._moveCount,
     };
   }
 }

@@ -2,6 +2,7 @@ export type PieceState = {
   type: string;
   x: number;
   y: number;
+  moveCount: number;
 };
 
 export type PlayerState = {
