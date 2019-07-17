@@ -1,7 +1,7 @@
 import Color from './Color';
 import Side from './Side';
 import Board from './Board';
-import Piece from './pieces';
+import Piece from './pieces/Piece';
 import Square from './Square';
 
 export default class Player {

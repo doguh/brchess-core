@@ -85,11 +85,12 @@ export default class Piece {
     let repeat: number = 0;
     let hypothetic: Square = null;
     this.movements.forEach((movement: Movement) => {
+      console.log(movement);
       repeat = 0;
       hypothetic = this.square;
       while (repeat < movement.repeat) {
-        x = this.square.x + movement.x * this.player.side.x;
-        y = this.square.y + movement.y * this.player.side.y;
+        x = hypothetic.x + movement.x * this.player.side.x;
+        y = hypothetic.y + movement.y * this.player.side.y;
         hypothetic = this.board.getSquare(x, y);
         if (
           // si la case existe
@@ -99,7 +100,14 @@ export default class Piece {
             hypothetic.piece.player.color !== this.player.color) &&
           // et que la condition du movement est remplie
           (movement.condition === null ||
-            movement.condition(movement, hypothetic, this, this.board))
+            movement.condition(
+              movement,
+              this.square,
+              hypothetic,
+              this,
+              this.board,
+              repeat
+            ))
         ) {
           squares.push(hypothetic);
           repeat++;

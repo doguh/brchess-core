@@ -1,5 +1,5 @@
 import Movement, { makeMove } from '../Movement';
-import Piece from '.';
+import Piece from './Piece';
 import { KingType } from '../PieceType';
 
 const movements: Movement[] = [

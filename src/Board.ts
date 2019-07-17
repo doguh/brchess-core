@@ -1,8 +1,10 @@
 import Square from './Square';
 import Color, { ColorWhite, ColorBlack } from './Color';
 import Player from './Player';
-import King from './pieces/King';
 import { SideBottom, SideTop } from './Side';
+// import { King, Pawn } from './pieces';
+import King from './pieces/King';
+import Pawn from './pieces/Pawn';
 
 export default class Board {
   /**
@@ -57,7 +59,9 @@ export default class Board {
     const headsRank = player.side === SideBottom ? 0 : 7;
     player.addPiece(new King(), this.getSquare(4, headsRank));
     const pawnsRank = player.side === SideBottom ? 1 : 6;
-    for (let i = 1; i <= 8; i++) {}
+    for (let i = 0; i < 8; i++) {
+      player.addPiece(new Pawn(), this.getSquare(i, pawnsRank));
+    }
   }
 
   /**

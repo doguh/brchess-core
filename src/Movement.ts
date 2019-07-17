@@ -4,9 +4,11 @@ import Board from './Board';
 
 export type MovementCondition = (
   movement: Movement,
-  square: Square,
+  origin: Square,
+  target: Square,
   piece: Piece,
-  board: Board
+  board: Board,
+  repeat: number
 ) => boolean;
 
 export default interface Movement {
@@ -34,8 +36,8 @@ export default interface Movement {
  * creates a new Movement
  * @param x
  * @param y
- * @param repeat
- * @param condition
+ * @param repeat (default=1)
+ * @param condition (default=null)
  * @returns {Movement}
  */
 export function makeMove(
