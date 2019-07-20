@@ -16,7 +16,7 @@ export interface IComponent {
    */
   onMount(options: any): void;
   /**
-   * called when the component receive new props
+   * called just before the component receives new props
    * (also called on first time, if `initialProps` are not `null`)
    * @param newProps new props
    * @param oldProps old props
@@ -157,8 +157,8 @@ export class Component implements IComponent {
   }
 
   private destroy(): void {
-    this.onUnmount();
     each(this.components, (c: Component) => c.destroy());
+    this.onUnmount();
     this.components = null;
     this.state = null;
     this.props = null;
@@ -172,6 +172,11 @@ export class Board extends Component {
   state: BoardState;
   props: BoardState;
   squares: Square[];
+
+  getSquareAt(x: number, y: number): Square {
+    // TODO
+    return null;
+  }
 
   onMount(): void {
     const len = WIDTH * HEIGHT;
@@ -194,7 +199,6 @@ export class Board extends Component {
   }
 
   update(state: any, props: BoardState): ComponentUpdateList {
-    // todo squares (à faire ici, pas dans player/piece... oupa?)
     return {
       player1: { component: Player, props: state.player1 },
       player2: { component: Player, props: state.player2 }
@@ -202,7 +206,8 @@ export class Board extends Component {
   }
 
   onUnmount(): void {
-    this.squares = null; // maybe destroy each square
+    if (this.squares) this.squares.forEach(square => (square.piece = null));
+    this.squares = null;
   }
 }
 
@@ -244,7 +249,36 @@ export class Piece extends Component {
     this.player = player;
   }
 
+  get square(): Square {
+    return this.player.board.getSquareAt(this.props.x, this.props.y);
+  }
+
+  onReceiveProps(newProps: PieceState, oldProps: PieceState): void {
+    if (!oldProps || newProps.x !== oldProps.x || newProps.y !== oldProps.y) {
+      if (oldProps) {
+        const oldSquare: Square = this.player.board.getSquareAt(
+          oldProps.x,
+          oldProps.y
+        );
+        if (oldSquare.piece === this) {
+          oldSquare.piece = null;
+        }
+      }
+      const newSquare: Square = this.player.board.getSquareAt(
+        newProps.x,
+        newProps.y
+      );
+      newSquare.piece = this;
+    }
+  }
+
   onUnmount(): void {
+    if (this.props) {
+      const square: Square = this.square;
+      if (square && square.piece === this) {
+        square.piece = null;
+      }
+    }
     this.player = null;
   }
 }
