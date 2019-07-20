@@ -169,8 +169,6 @@ const WIDTH: number = 8;
 const HEIGHT: number = 8;
 
 export class Board extends Component {
-  state: BoardState;
-  props: BoardState;
   squares: Square[];
 
   getSquareAt(x: number, y: number): Square {
@@ -198,10 +196,10 @@ export class Board extends Component {
     this.setState(newProps);
   }
 
-  update(state: any, props: BoardState): ComponentUpdateList {
+  update(state: BoardState, props: BoardState): ComponentUpdateList {
     return {
-      player1: { component: Player, props: state.player1 },
-      player2: { component: Player, props: state.player2 }
+      player1: { component: Player, props: { ...state.player1, board: this } },
+      player2: { component: Player, props: { ...state.player2, board: this } }
     };
   }
 
@@ -212,12 +210,10 @@ export class Board extends Component {
 }
 
 export class Player extends Component {
-  props: PlayerState;
-  board: Board;
+  props: PlayerState & { board: Board };
 
-  constructor(initialProps: PlayerState, board: Board) {
-    super(initialProps);
-    this.board = board;
+  get board(): Board {
+    return this.props.board;
   }
 
   update(state: any, props: PlayerState): ComponentUpdateList {
@@ -226,7 +222,7 @@ export class Player extends Component {
         (acc: ComponentUpdateList, key: string): ComponentUpdateList => {
           acc.key = {
             component: Piece,
-            props: props.pieces[key]
+            props: { ...props.pieces[key], player: this }
           };
           return acc;
         },
@@ -234,23 +230,17 @@ export class Player extends Component {
       )
     };
   }
-
-  onUnmount(): void {
-    this.board = null;
-  }
 }
 
 export class Piece extends Component {
-  props: PieceState;
-  player: Player;
-
-  constructor(initialProps: PieceState, player: Player) {
-    super(initialProps);
-    this.player = player;
-  }
+  props: PieceState & { player: Player };
 
   get square(): Square {
     return this.player.board.getSquareAt(this.props.x, this.props.y);
+  }
+
+  get player(): Player {
+    return this.props.player;
   }
 
   onReceiveProps(newProps: PieceState, oldProps: PieceState): void {
@@ -279,6 +269,5 @@ export class Piece extends Component {
         square.piece = null;
       }
     }
-    this.player = null;
   }
 }
