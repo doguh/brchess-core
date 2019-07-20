@@ -1,3 +1,5 @@
+import { Component } from "./interfaces";
+
 export type PieceState = {
   type: string;
   x: number;
@@ -6,20 +8,22 @@ export type PieceState = {
   dead: boolean;
 };
 
-// export type PieceListState = {
-//   [key: string]: PieceState;
-// };
+export type ComponentsList = {
+  [key: string]: Component;
+};
 
-// export type PieceListState = Record<string, PieceState>;
+export type PieceStateList = {
+  [key: string]: PieceState;
+};
 
 export type Team = {
   color: string;
-  side: 'bottom' | 'top';
+  side: "bottom" | "top";
 };
 
 export type PlayerState = {
   team: Team;
-  pieces: PieceState[];
+  pieces: PieceStateList;
 };
 
 export type BoardState = {
@@ -27,4 +31,13 @@ export type BoardState = {
   currentPlayer: string;
   player1: PlayerState;
   player2: PlayerState;
+};
+
+export type ComponentUpdate = {
+  component: any; // typeof <? extends Component> # mais ça a l'air impossible à faire...
+  props: any;
+};
+
+export type ComponentUpdateList = {
+  [key: string]: ComponentUpdate;
 };

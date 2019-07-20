@@ -1,9 +1,54 @@
-import { PlayerState, PieceState, BoardState } from './types';
+import {
+  PlayerState,
+  PieceState,
+  BoardState,
+  ComponentUpdateList,
+  ComponentUpdate
+} from "./types";
 
 export interface IComponent {
   state: any;
+  props: any;
+  /**
+   * called inside the constructor just before the `update` method
+   * is called for the first time
+   * @param options contructor's `initOptions`
+   */
+  onMount(options: any): void;
+  /**
+   * called when the component receive new props
+   * (also called on first time, if `initialProps` are not `null`)
+   * @param newProps new props
+   * @param oldProps old props
+   */
+  onReceiveProps(newProps: any, oldProps: any): void;
+  /**
+   * called right before the component is destroyed
+   */
+  onUnmount(): void;
+  /**
+   * can only be called from within the component itself
+   * @param state new state
+   */
   setState(state: any): void;
-  destroy: () => void;
+  /**
+   * called when the `state` or the `props` have changed,
+   * it should be overriden in subclasses but never called manually
+   *
+   * it should return an iteratable object of updates to apply to the children components
+   *
+   * @example
+   * update(state) {
+   *   return {
+   *     key: { component: CustomComponentClass, props: state.myComponentProps }
+   *   }
+   * }
+   *
+   * @param state new state
+   * @param props new props
+   * @returns {ComponentUpdateList} a list of updates that should be applied to the children components
+   */
+  update(state: any, props: any): ComponentUpdateList;
 }
 
 export interface ISquare {
@@ -39,16 +84,84 @@ export class Square implements ISquare {
   }
 }
 
+function each<T>(
+  obj: Object,
+  cb: (value: T, key: string, obj: Object) => void
+) {
+  Object.keys(obj).forEach(key => cb(obj[key], key, obj));
+}
+
 export class Component implements IComponent {
   state: any;
-  constructor(initialState: any = null, initOptions: any = null) {
-    this.init(initOptions);
-    this.setState(initialState);
+  props: any;
+  private updating: boolean;
+  private components: { [key: string]: Component } = {};
+
+  constructor(initialProps: any = null, initOptions: any = null) {
+    this.updating = true;
+    this.setProps(initialProps);
+    this.onMount(initOptions);
+    this.internalUpdate();
+    this.updating = false;
   }
-  init(options: any): void {}
-  setState(state: any): void {}
-  destroy(): void {
+
+  onMount(options: any): void {}
+
+  private internalUpdate(): void {
+    const us: ComponentUpdateList = this.update(this.state, this.props);
+    // loop through existing components, and remove those which are not in the new list
+    each(this.components, (c: Component, key: string) => {
+      if (!us || !us[key]) {
+        c.destroy();
+        delete this.components[key];
+      }
+    });
+    // loop through the new list and create/update the components
+    if (us) {
+      each(us, (u: ComponentUpdate, key: string) => {
+        if (!this.components[key]) {
+          this.components[key] = new u.component(u.props);
+        } else {
+          this.components[key].setProps(u.props);
+        }
+      });
+    }
+  }
+
+  onReceiveProps(newProps: any, oldProps: any): void {}
+
+  onUnmount(): void {}
+
+  private setProps(props: any): void {
+    if (!props || props === this.props) {
+      // implements shallow equals here too
+      return;
+    }
+    const callUpdate: boolean = !this.updating;
+    this.updating = true;
+    this.onReceiveProps(props, this.props);
+    this.props = props;
+    if (callUpdate) {
+      this.internalUpdate();
+      this.updating = false;
+    }
+  }
+
+  setState(state: any): void {
+    this.state = state;
+    if (!this.updating) this.internalUpdate();
+  }
+
+  update(state: any, props: any): ComponentUpdateList {
+    return null;
+  }
+
+  private destroy(): void {
+    this.onUnmount();
+    each(this.components, (c: Component) => c.destroy());
+    this.components = null;
     this.state = null;
+    this.props = null;
   }
 }
 
@@ -57,11 +170,10 @@ const HEIGHT: number = 8;
 
 export class Board extends Component {
   state: BoardState;
+  props: BoardState;
   squares: Square[];
-  player1: Player;
-  player2: Player;
 
-  init(options: any): void {
+  onMount(): void {
     const len = WIDTH * HEIGHT;
     let x: number;
     let y: number;
@@ -71,98 +183,68 @@ export class Board extends Component {
     for (let i: number = 0; i < len; i++) {
       x = i % WIDTH;
       x === 0 && i > 0 && y++;
-      color = x % 2 === y % 2 ? 'black' : 'white';
+      color = x % 2 === y % 2 ? "black" : "white";
       this.squares[i] = new Square(x, y, color);
     }
   }
 
-  setState(state: BoardState): void {
-    this.state = state;
-
-    if (!this.player1) {
-      this.player1 = new Player(state.player1, this);
-    } else if (this.player1.state !== state.player1) {
-      this.player1.setState(state.player1);
-    }
-
-    if (!this.player2) {
-      this.player2 = new Player(state.player2, this);
-    } else if (this.player2.state !== state.player2) {
-      this.player2.setState(state.player2);
-    }
-
-    // todo squares (à faire ici, pas dans player/piece... oupa?)
+  onReceiveProps(newProps: BoardState): void {
+    // map props to state
+    this.setState(newProps);
   }
 
-  destroy(): void {
-    this.state = null;
+  update(state: any, props: BoardState): ComponentUpdateList {
+    // todo squares (à faire ici, pas dans player/piece... oupa?)
+    return {
+      player1: { component: Player, props: state.player1 },
+      player2: { component: Player, props: state.player2 }
+    };
+  }
+
+  onUnmount(): void {
     this.squares = null; // maybe destroy each square
-    if (this.player1) this.player1.destroy();
-    this.player1 = null;
-    if (this.player2) this.player2.destroy();
-    this.player2 = null;
   }
 }
 
 export class Player extends Component {
-  state: PlayerState;
+  props: PlayerState;
   board: Board;
-  pieces: Piece[];
 
-  constructor(initialState: PlayerState, board: Board) {
-    super(initialState);
+  constructor(initialProps: PlayerState, board: Board) {
+    super(initialProps);
     this.board = board;
   }
 
-  setState(state: PlayerState): void {
-    this.state = state;
-
-    if (!this.pieces) {
-      this.pieces = [];
-    }
-    const len = state.pieces.length;
-    while (len < this.pieces.length) {
-      // we should never enter here, but just in case...
-      this.pieces.pop().destroy();
-    }
-    for (let i: number = 0; i < len; i++) {
-      const pieceState: PieceState = state.pieces[i];
-      const piece: Piece = this.pieces[i];
-      if (!piece) {
-        this.pieces[i] = new Piece(pieceState, this);
-      } else if (piece.state !== pieceState) {
-        piece.setState(pieceState);
-      }
-    }
+  update(state: any, props: PlayerState): ComponentUpdateList {
+    return {
+      ...Object.keys(props.pieces).reduce(
+        (acc: ComponentUpdateList, key: string): ComponentUpdateList => {
+          acc.key = {
+            component: Piece,
+            props: props.pieces[key]
+          };
+          return acc;
+        },
+        {}
+      )
+    };
   }
 
-  destroy(): void {
-    super.destroy();
+  onUnmount(): void {
     this.board = null;
-    if (this.pieces) {
-      while (this.pieces.length) {
-        this.pieces.pop().destroy();
-      }
-    }
-    this.pieces = null;
   }
 }
 
 export class Piece extends Component {
-  state: PieceState;
+  props: PieceState;
   player: Player;
 
-  constructor(initialState: PieceState, player: Player) {
-    super(initialState);
+  constructor(initialProps: PieceState, player: Player) {
+    super(initialProps);
     this.player = player;
   }
 
-  setState(state: PieceState): void {
-    this.state = state;
-  }
-
-  destroy(): void {
-    super.destroy();
+  onUnmount(): void {
     this.player = null;
   }
 }
