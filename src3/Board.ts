@@ -177,14 +177,19 @@ export default class Board {
           ) {
             if (hypothetic.piece) {
               // case occupée par un ennemi, mouvement obligatoire
+              // TODO check for check after this move
               mandatoryDest.push(hypothetic);
               return;
             }
             // case libre
+            // TODO check for check after this move
             possibleDest.push(hypothetic);
             // on continue de chercher si ce mouvement est répétable
             repeat++;
           } else {
+            // si la case n'existe pas
+            // ou est occupée par un allié
+            // ou la condition du mouvement ne permet pas d'y aller
             return;
           }
         }

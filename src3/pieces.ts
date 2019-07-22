@@ -33,3 +33,61 @@ export const King = registerPieceType({
     makeMove(-1, 0),
   ],
 });
+
+export const Queen = registerPieceType({
+  key: 'q',
+  movements: [
+    makeMove(1, 0, 8),
+    makeMove(1, 1, 8),
+    makeMove(1, -1, 8),
+    makeMove(0, 1, 8),
+    makeMove(0, -1, 8),
+    makeMove(-1, 0, 8),
+    makeMove(-1, 1, 8),
+    makeMove(-1, -1, 8),
+  ],
+});
+
+export const Bishop = registerPieceType({
+  key: 'b',
+  movements: [
+    makeMove(1, 1, 8),
+    makeMove(1, -1, 8),
+    makeMove(-1, 1, 8),
+    makeMove(-1, -1, 8),
+  ],
+});
+
+export const Knight = registerPieceType({
+  key: 'n',
+  movements: [
+    makeMove(-1, 2),
+    makeMove(1, 2),
+    makeMove(-1, -2),
+    makeMove(1, -2),
+    makeMove(-2, 1),
+    makeMove(-2, -1),
+    makeMove(2, 1),
+    makeMove(2, -1),
+  ],
+});
+
+export const Rook = registerPieceType({
+  key: 'r',
+  movements: [
+    makeMove(1, 0, 8),
+    makeMove(0, 1, 8),
+    makeMove(0, -1, 8),
+    makeMove(-1, 0, 8),
+  ],
+});
+
+// export const Pawn = registerPieceType({
+//   key: '',
+//   movements: [
+//     makeMove(0, 1, 1, conditionEmpty),
+//     makeMove(0, 2, 1, conditionFirstMove),
+//     makeMove(1, 1, 1, killCondition),
+//     makeMove(-1, 1, 1, killCondition),
+//   ],
+// });
