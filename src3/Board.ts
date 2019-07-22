@@ -1,4 +1,13 @@
-import { BoardState, Square, Color, PieceState } from './types';
+import {
+  BoardState,
+  Square,
+  Color,
+  PieceState,
+  MovesList,
+  PieceType,
+  Movement,
+} from './types';
+import { getPieceType } from './pieces';
 
 const WIDTH = 8;
 const HEIGHT = 8;
@@ -6,6 +15,8 @@ const HEIGHT = 8;
 export default class Board {
   private state: BoardState;
   private squares: Square[];
+  private possibleMoves: MovesList[];
+  private mandatoryMoves: MovesList[];
 
   constructor(state: BoardState = null) {
     const len = WIDTH * HEIGHT;
@@ -55,6 +66,7 @@ export default class Board {
     }
 
     this.state = state;
+    this.invalidatePossibleMoves();
   }
 
   getState(): BoardState {
@@ -62,6 +74,9 @@ export default class Board {
   }
 
   getSquare(x: number, y: number): Square {
+    if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
+      return null;
+    }
     return this.squares[x + y * WIDTH];
   }
 
@@ -99,6 +114,86 @@ export default class Board {
           return p;
         }
       }),
+    });
+  }
+
+  invalidatePossibleMoves(): void {
+    this.possibleMoves = [];
+    this.mandatoryMoves = [];
+
+    /**
+     * on parcours chaque piece du joueur en cours
+     */
+    this.state.pieces.forEach((piece: PieceState) => {
+      if (piece.color !== this.state.whoseTurn) return;
+      const pieceType: PieceType = getPieceType(piece.type);
+      const possibleDest: Square[] = [];
+      const mandatoryDest: Square[] = [];
+
+      let x: number = 0;
+      let y: number = 0;
+      let repeat: number = 0;
+      let hypothetic: Square = null;
+      const from: Square = this.getSquare(piece.x, piece.y);
+      const sideMult: number = 1; // 1 on bottom, -1 on top
+
+      /**
+       * pour chaque piece on teste tous ses mouvements
+       * et on ne retient que les possibles
+       */
+      pieceType.movements.forEach((movement: Movement) => {
+        repeat = 0;
+        hypothetic = from;
+        // tant que le mouvement peut être répété
+        while (repeat < movement.repeat) {
+          x = hypothetic.x + movement.x * sideMult;
+          y = hypothetic.y + movement.y * sideMult;
+          hypothetic = this.getSquare(x, y);
+          if (
+            // si la case existe
+            hypothetic &&
+            // et qu'elle est vide ou occupée par un ennemi
+            (hypothetic.piece === null ||
+              hypothetic.piece.color !== piece.color) &&
+            // et que la condition du movement est remplie
+            (movement.condition === null ||
+              movement.condition(
+                movement,
+                from,
+                hypothetic,
+                piece,
+                this,
+                repeat
+              ))
+          ) {
+            if (hypothetic.piece) {
+              // case occupée par un ennemi, mouvement obligatoire
+              mandatoryDest.push(hypothetic);
+              return;
+            }
+            // case libre
+            possibleDest.push(hypothetic);
+            // on continue de chercher si ce mouvement est répétable
+            repeat++;
+          } else {
+            return;
+          }
+        }
+      });
+
+      if (mandatoryDest.length) {
+        // si cette case a des mouvements obligatoires, on les enregistre
+        this.mandatoryMoves.push({
+          from: from,
+          to: mandatoryDest,
+        });
+      } else if (possibleDest.length) {
+        // si elle n'a pas de mouvement obligatoire, on enregistre les mouvements possibles
+        this.possibleMoves.push({
+          from: from,
+          to: possibleDest,
+        });
+      }
     });
   }
 }

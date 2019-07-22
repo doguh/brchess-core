@@ -2,12 +2,12 @@ import { PieceType, MovementCondition } from './types';
 
 const types: { [key: string]: PieceType } = {};
 
-export function register(t: PieceType): PieceType {
+export function registerPieceType(t: PieceType): PieceType {
   types[t.key] = t;
   return t;
 }
 
-export function get(key: string): PieceType {
+export function getPieceType(key: string): PieceType {
   return types[key];
 }
 
@@ -20,7 +20,7 @@ export function makeMove(
   return { x, y, repeat, condition };
 }
 
-export const King = register({
+export const King = registerPieceType({
   key: 'k',
   movements: [
     makeMove(0, 1),
