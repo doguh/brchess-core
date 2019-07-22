@@ -7,6 +7,7 @@ import {
   PieceType,
   Movement,
   FlatMovesList,
+  Side,
 } from './types';
 import { getPieceType } from './pieces';
 
@@ -40,6 +41,7 @@ export default class Board {
   }
 
   setState(nextState: BoardState) {
+    console.log('setState');
     // demap old state positions
     if (this.state) {
       this.state.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = null));
@@ -77,6 +79,7 @@ export default class Board {
   }
 
   move(x: number, y: number, toX: number, toY: number): void {
+    console.log('move', { x, y, toX, toY });
     const piece: PieceState = this.getPiece(x, y);
     if (!piece) {
       throw new Error(`No piece found in ${x},${y}`);
@@ -151,14 +154,22 @@ export default class Board {
   }
 
   invalidatePossibleMoves(): void {
-    this.possibleMoves = [];
-    this.mandatoryMoves = [];
-
+    console.log('invalidate possible moves');
     // multiplicateur des mouvements selon le côté du joueur (1 ou -1):
     // les pions ne pouvant aller qu'en avant (y=1),
     // on multiplie le mouvement par -1 pour le joueur du haut
     const sideMult: number =
       this.state.whoseTurn === 0 ? this.state.whiteSide : -this.state.whiteSide;
+
+    const isCheck: boolean = testCheck({
+      king: this.currentKing,
+      pieces: this.state.pieces,
+      sideMult: sideMult as Side,
+    });
+    console.log('is check:', isCheck);
+
+    this.possibleMoves = [];
+    this.mandatoryMoves = [];
 
     /**
      * on parcours chaque piece du joueur en cours
@@ -204,8 +215,13 @@ export default class Board {
                 repeat
               ))
           ) {
-            testCheck({
+            /**
+             * test if the king will be checked after this move
+             */
+            const willCheck: boolean = testCheck({
               king: this.currentKing,
+              sideMult: sideMult as Side,
+              // TODO trouver un moyen de pas avoir a réécrire state.pieces.reduce...
               pieces: this.state.pieces.reduce<PieceState[]>(
                 (acc: PieceState[], p: PieceState): PieceState[] => {
                   if (p === piece) {
@@ -227,11 +243,11 @@ export default class Board {
 
             if (hypothetic.piece) {
               // case occupée par un ennemi, mouvement obligatoire
-              mandatoryDest.push(hypothetic);
+              if (!willCheck) mandatoryDest.push(hypothetic);
               return;
             }
             // case libre
-            possibleDest.push(hypothetic);
+            if (!willCheck) possibleDest.push(hypothetic);
             // on continue de chercher si ce mouvement est répétable
             repeat++;
           } else {
@@ -288,12 +304,91 @@ function flatMovesList(list: MovesList[]): FlatMovesList {
 }
 
 /**
+ * used to create a virtual board for check test
+ * @param squares
+ * @param x
+ * @param y
+ */
+function getOrCreateSquare(squares: Square[], x: number, y: number): Square {
+  if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
+    return null;
+  }
+  return (
+    squares[x + y * WIDTH] ||
+    (squares[x + y * WIDTH] = {
+      x,
+      y,
+      piece: null,
+      color: null,
+    })
+  );
+}
+
+/**
  * test if the king can be killed by an opponent
  * @param state
  */
 export function testCheck(state: {
-  king: { x: number; y: number };
+  king: PieceState;
   pieces: PieceState[];
+  sideMult: Side;
 }): boolean {
-  return false;
+  const squares: Square[] = [];
+  const { king, pieces, sideMult } = state;
+  const what = pieces
+    .filter((piece, i) => {
+      getOrCreateSquare(squares, piece.x, piece.y).piece = piece;
+      return piece.color !== king.color;
+    })
+    .some(piece => {
+      // apply piece movements
+      const pieceType: PieceType = getPieceType(piece.type);
+      const from: Square = getOrCreateSquare(squares, piece.x, piece.y);
+      let repeat: number;
+      let hypothetic: Square;
+      let x: number;
+      let y: number;
+      // TODO trouver un moyen de pas dupliquer ce code dans invalidatePositions et ici
+      return pieceType.movements.some((movement: Movement) => {
+        repeat = 0;
+        hypothetic = from;
+        // tant que le mouvement peut être répété
+        while (repeat < movement.repeat) {
+          x = hypothetic.x + movement.x * sideMult;
+          y = hypothetic.y + movement.y * sideMult;
+          hypothetic = getOrCreateSquare(squares, x, y);
+          if (
+            // si la case existe
+            hypothetic &&
+            // et qu'elle est vide ou occupée par un ennemi
+            (hypothetic.piece === null ||
+              hypothetic.piece.color !== piece.color) &&
+            // et que la condition du movement est remplie
+            (movement.condition === null ||
+              movement.condition(
+                movement,
+                from,
+                hypothetic,
+                piece,
+                this,
+                repeat
+              ))
+          ) {
+            if (hypothetic.piece) {
+              // case occupée par un ennemi
+              return hypothetic.piece === king;
+            }
+            // on continue de chercher si ce mouvement est répétable
+            repeat++;
+          } else {
+            // si la case n'existe pas
+            // ou est occupée par un allié
+            // ou la condition du mouvement ne permet pas d'y aller
+            return false;
+          }
+        }
+        return false;
+      });
+    });
+  return what;
 }
