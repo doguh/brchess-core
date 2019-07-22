@@ -90,12 +90,38 @@ export default class Board {
         `The piece found in ${x},${y} does not belong to the current player`
       );
     }
+    if (piece.x !== x || piece.y !== y) {
+      throw new Error(
+        `Piece position {${piece.x},${
+          piece.y
+        }} differs from {${x},${y}}. This should never happen: the state has probably been mutated.`
+      );
+    }
 
-    // do all the verification stuff
+    if (this.mandatoryMoves.length) {
+      /**
+       * si il y a des mouvements obligatoires,
+       * on vérifie que le mouvement en fait partie
+       */
+      if (!isMoveInList(x, y, toX, toY, this.mandatoryMoves)) {
+        throw new Error(
+          'Cannot make this move because there are mandatory moves'
+        );
+      }
+    } else {
+      /**
+       * si il n'y a pas de mouvement obligatoire,
+       * on vérifie que le mouvement est possible
+       */
+      if (!isMoveInList(x, y, toX, toY, this.possibleMoves)) {
+        throw new Error('Illegal move');
+      }
+    }
 
-    let killed: PieceState = null;
+    // si il y a une piece sur la case d'arrivée, elle est tuée
+    const killed: PieceState = this.getSquare(toX, toY).piece;
 
-    // dispatch move and kill events
+    // TODO maybe dispatch move and kill events
 
     this.setState({
       whiteSide: this.state.whiteSide,
@@ -207,4 +233,21 @@ export default class Board {
       }
     });
   }
+}
+
+function isMoveInList(
+  x: number,
+  y: number,
+  toX: number,
+  toY: number,
+  list: MovesList[]
+): boolean {
+  return list.some((moves: MovesList) => {
+    if (moves.from.x === x && moves.from.x === y) {
+      return moves.to.some(dest => {
+        return dest.x === toX && dest.y === toY;
+      });
+    }
+    return false;
+  });
 }
