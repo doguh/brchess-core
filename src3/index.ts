@@ -3,6 +3,8 @@ import getDefaultBoardState from './state';
 
 const b = new Board(getDefaultBoardState());
 
+console.log(b);
+
 console.log(b.getSquare(4, 0));
 console.log(b.getSquare(4, 7));
 
@@ -13,3 +15,8 @@ b.move(4, 0, 4, 7);
 
 console.log(b.getSquare(4, 0));
 console.log(b.getSquare(4, 7));
+
+console.log(b);
+
+console.log(b.getSquare(5, 7));
+console.log(b.getSquare(7, 7));

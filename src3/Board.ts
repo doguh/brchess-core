@@ -37,41 +37,24 @@ export default class Board {
     }
   }
 
-  setState(state: BoardState) {
-    if (this.state && this.state.pieces.length !== state.pieces.length) {
-      // si le nombre de pièces a changé, maybe do something
+  setState(nextState: BoardState) {
+    // demap old state positions
+    if (this.state) {
+      this.state.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = null));
     }
+    // map new state positions
+    nextState.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = p));
 
-    for (let i = 0; i < state.pieces.length; i++) {
-      const newPiece: PieceState = state.pieces[i];
-      const oldPiece: PieceState = this.state && this.state.pieces[i];
-
-      if (
-        !oldPiece ||
-        !newPiece ||
-        oldPiece.x !== newPiece.x ||
-        oldPiece.y !== newPiece.y ||
-        oldPiece.type !== newPiece.type ||
-        oldPiece.color !== newPiece.color
-      ) {
-        if (oldPiece) {
-          const square: Square = this.getSquare(oldPiece.x, oldPiece.y);
-          if (square.piece === oldPiece) square.piece = null;
-        }
-
-        if (newPiece) {
-          const square: Square = this.getSquare(newPiece.x, newPiece.y);
-          square.piece = newPiece;
-        }
-      }
-    }
-
-    this.state = state;
+    this.state = nextState;
     this.invalidatePossibleMoves();
   }
 
   getState(): BoardState {
     return this.state;
+  }
+
+  getPiece(x: number, y: number): PieceState {
+    return this.getSquare(x, y).piece;
   }
 
   getSquare(x: number, y: number): Square {
@@ -82,7 +65,7 @@ export default class Board {
   }
 
   move(x: number, y: number, toX: number, toY: number): void {
-    const piece: PieceState = this.getSquare(x, y).piece;
+    const piece: PieceState = this.getPiece(x, y);
     if (!piece) {
       throw new Error(`No piece found in ${x},${y}`);
     }
@@ -120,28 +103,30 @@ export default class Board {
     }
 
     // si il y a une piece sur la case d'arrivée, elle est tuée
-    const killed: PieceState = this.getSquare(toX, toY).piece;
+    const killed: PieceState = this.getPiece(toX, toY);
 
     // TODO maybe dispatch move and kill events
 
     this.setState({
       whiteSide: this.state.whiteSide,
       whoseTurn: ((this.state.whoseTurn + 1) % 2) as Color,
-      pieces: this.state.pieces.map((p: PieceState) => {
-        if (p === piece) {
-          return {
-            type: p.type,
-            color: p.color,
-            x: toX,
-            y: toY,
-          };
-        } else if (p === killed) {
-          // on met le state de la piece tuée à null
-          return null;
-        } else {
-          return p;
-        }
-      }),
+      pieces: this.state.pieces.reduce<PieceState[]>(
+        (acc: PieceState[], p: PieceState): PieceState[] => {
+          if (p === piece) {
+            acc.push({
+              type: p.type,
+              color: p.color,
+              x: toX,
+              y: toY,
+            });
+          } else if (p !== killed) {
+            // on retire de la liste la piece tuée
+            acc.push(p);
+          }
+          return acc;
+        },
+        []
+      ),
     });
   }
 
