@@ -50,3 +50,10 @@ export type MovesList = {
  * `1` = bottom, `-1` = top
  */
 export type Side = 1 | -1;
+
+export type FlatMovesList = {
+  x: number;
+  y: number;
+  toX: number;
+  toY: number;
+}[];

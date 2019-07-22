@@ -6,6 +6,7 @@ import {
   MovesList,
   PieceType,
   Movement,
+  FlatMovesList,
 } from './types';
 import { getPieceType } from './pieces';
 
@@ -144,6 +145,14 @@ export default class Board {
     });
   }
 
+  getMandatoryMoves(): FlatMovesList {
+    return flatMovesList(this.mandatoryMoves);
+  }
+
+  getPossibleMoves(): FlatMovesList {
+    return flatMovesList(this.possibleMoves);
+  }
+
   invalidatePossibleMoves(): void {
     this.possibleMoves = [];
     this.mandatoryMoves = [];
@@ -250,4 +259,14 @@ function isMoveInList(
     }
     return false;
   });
+}
+
+function flatMovesList(list: MovesList[]): FlatMovesList {
+  const out: FlatMovesList = [];
+  list.forEach(moves => {
+    moves.to.forEach(dest =>
+      out.push({ x: moves.from.x, y: moves.from.y, toX: dest.x, toY: dest.y })
+    );
+  });
+  return out;
 }
