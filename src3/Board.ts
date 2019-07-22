@@ -158,7 +158,7 @@ export default class Board {
      * on parcours chaque piece du joueur en cours
      */
     this.state.pieces.forEach((piece: PieceState) => {
-      if (piece.color !== this.state.whoseTurn) return;
+      if (!piece || piece.color !== this.state.whoseTurn) return;
       const pieceType: PieceType = getPieceType(piece.type);
       const possibleDest: Square[] = [];
       const mandatoryDest: Square[] = [];
@@ -243,7 +243,7 @@ function isMoveInList(
   list: MovesList[]
 ): boolean {
   return list.some((moves: MovesList) => {
-    if (moves.from.x === x && moves.from.x === y) {
+    if (moves.from.x === x && moves.from.y === y) {
       return moves.to.some(dest => {
         return dest.x === toX && dest.y === toY;
       });
