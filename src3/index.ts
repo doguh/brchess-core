@@ -1,6 +1,8 @@
 import Board from './Board';
 import getDefaultBoardState from './state';
 
+let t = Date.now();
+
 const b = new Board(getDefaultBoardState());
 
 // console.log(b);
@@ -33,3 +35,5 @@ console.log('mandatory moves:', b.getMandatoryMoves());
 
 // console.log(b.getSquare(5, 7));
 // console.log(b.getSquare(7, 7));
+
+console.log(Date.now() - t + 'ms');

@@ -176,7 +176,7 @@ export default class Board {
           from,
           sideMult as Side,
           this.getSquare.bind(this),
-          (hypothetic: Square) => {
+          (hypothetic: Square): void => {
             /**
              * test if the king will be checked after this move
              */
@@ -326,10 +326,6 @@ export function testCheck(state: {
       // apply piece movements
       const pieceType: PieceType = getPieceType(piece.type);
       const from: Square = getOrCreateSquare(squares, piece.x, piece.y);
-      let repeat: number;
-      let hypothetic: Square;
-      let x: number;
-      let y: number;
       // TODO trouver un moyen de pas dupliquer ce code dans invalidatePositions et ici
       return pieceType.movements.some(movement =>
         findPossibleDestinations(
@@ -338,7 +334,7 @@ export function testCheck(state: {
           from,
           sideMult,
           getSquare,
-          (hypothetic: Square) => {
+          (hypothetic: Square): true | void => {
             if (hypothetic.piece && hypothetic.piece === king) {
               return true;
             }
