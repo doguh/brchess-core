@@ -40,6 +40,9 @@ export default class Board {
     if (this.state && this.state.pieces.length !== state.pieces.length) {
       // si le nombre de pièces a changé, maybe do something
     }
+    if (this.state && this.state.whiteSide !== state.whiteSide) {
+      // si les joueurs ont changé de côté, maybe do something
+    }
 
     for (let i = 0; i < state.pieces.length; i++) {
       const newPiece: PieceState = state.pieces[i];
@@ -98,6 +101,7 @@ export default class Board {
     // dispatch move and kill events
 
     this.setState({
+      whiteSide: this.state.whiteSide,
       whoseTurn: ((this.state.whoseTurn + 1) % 2) as Color,
       pieces: this.state.pieces.map((p: PieceState) => {
         if (p === piece) {
@@ -121,6 +125,12 @@ export default class Board {
     this.possibleMoves = [];
     this.mandatoryMoves = [];
 
+    // multiplicateur des mouvements selon le côté du joueur (1 ou -1):
+    // les pions ne pouvant aller qu'en avant (y=1),
+    // on multiplie le mouvement par -1 pour le joueur du haut
+    const sideMult: number =
+      this.state.whoseTurn === 0 ? this.state.whiteSide : -this.state.whiteSide;
+
     /**
      * on parcours chaque piece du joueur en cours
      */
@@ -135,7 +145,6 @@ export default class Board {
       let repeat: number = 0;
       let hypothetic: Square = null;
       const from: Square = this.getSquare(piece.x, piece.y);
-      const sideMult: number = 1; // 1 on bottom, -1 on top
 
       /**
        * pour chaque piece on teste tous ses mouvements
