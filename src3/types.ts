@@ -21,12 +21,10 @@ export type Square = {
 export type Color = 0 | 1;
 
 export type MovementCondition = (
-  movement: Movement,
   from: Square,
   to: Square,
-  piece: PieceState,
-  board: Board,
-  repeat: number
+  repeat: number,
+  getSquare: (x: number, y: number) => Square
 ) => boolean;
 
 export type Movement = {

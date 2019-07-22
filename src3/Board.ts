@@ -191,12 +191,10 @@ export default class Board {
             // et que la condition du movement est remplie
             (movement.condition === null ||
               movement.condition(
-                movement,
                 from,
                 hypothetic,
-                piece,
-                this,
-                repeat
+                repeat,
+                this.getSquare.bind(this)
               ))
           ) {
             /**
@@ -345,6 +343,7 @@ export function testCheck(state: {
 }): boolean {
   const squares: Square[] = [];
   const { king, pieces, sideMult } = state;
+  const getSquare = (x: number, y: number) => getOrCreateSquare(squares, x, y);
   const what = pieces
     .filter((piece, i) => {
       getOrCreateSquare(squares, piece.x, piece.y).piece = piece;
@@ -375,14 +374,7 @@ export function testCheck(state: {
               hypothetic.piece.color !== piece.color) &&
             // et que la condition du movement est remplie
             (movement.condition === null ||
-              movement.condition(
-                movement,
-                from,
-                hypothetic,
-                piece,
-                this,
-                repeat
-              ))
+              movement.condition(from, hypothetic, repeat, getSquare))
           ) {
             if (hypothetic.piece) {
               // case occupée par un ennemi
