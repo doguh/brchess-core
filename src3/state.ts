@@ -1,6 +1,6 @@
 import { BoardState, Side, Color } from './types';
 
-export default function getDefaultBoardState(whiteSide: Side): BoardState {
+export default function getDefaultBoardState(whiteSide: Side = 1): BoardState {
   const botColor: Color = whiteSide === 1 ? 0 : 1;
   const topColor: Color = whiteSide === 1 ? 1 : 0;
   return {
@@ -29,13 +29,13 @@ export default function getDefaultBoardState(whiteSide: Side): BoardState {
         color: botColor,
       },
       {
-        type: 'q',
+        type: whiteSide === 1 ? 'k' : 'q',
         x: 3,
         y: 0,
         color: botColor,
       },
       {
-        type: 'k',
+        type: whiteSide === 1 ? 'q' : 'k',
         x: 4,
         y: 0,
         color: botColor,
@@ -80,13 +80,13 @@ export default function getDefaultBoardState(whiteSide: Side): BoardState {
         color: topColor,
       },
       {
-        type: 'q',
+        type: whiteSide === 1 ? 'k' : 'q',
         x: 3,
         y: 7,
         color: topColor,
       },
       {
-        type: 'k',
+        type: whiteSide === 1 ? 'q' : 'k',
         x: 4,
         y: 7,
         color: topColor,

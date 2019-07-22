@@ -40,9 +40,6 @@ export default class Board {
     if (this.state && this.state.pieces.length !== state.pieces.length) {
       // si le nombre de pièces a changé, maybe do something
     }
-    if (this.state && this.state.whiteSide !== state.whiteSide) {
-      // si les joueurs ont changé de côté, maybe do something
-    }
 
     for (let i = 0; i < state.pieces.length; i++) {
       const newPiece: PieceState = state.pieces[i];
