@@ -125,23 +125,7 @@ export default class Board {
     this.setState({
       whiteSide: this.state.whiteSide,
       whoseTurn: ((this.state.whoseTurn + 1) % 2) as Color,
-      pieces: this.state.pieces.reduce<PieceState[]>(
-        (acc: PieceState[], p: PieceState): PieceState[] => {
-          if (p === piece) {
-            acc.push({
-              type: p.type,
-              color: p.color,
-              x: toX,
-              y: toY,
-            });
-          } else if (p !== killed) {
-            // on retire de la liste la piece tuée
-            acc.push(p);
-          }
-          return acc;
-        },
-        []
-      ),
+      pieces: reducePieces(this.state.pieces, piece, toX, toY, killed),
     });
   }
 
@@ -221,23 +205,12 @@ export default class Board {
             const willCheck: boolean = testCheck({
               king: this.currentKing,
               sideMult: sideMult as Side,
-              // TODO trouver un moyen de pas avoir a réécrire state.pieces.reduce...
-              pieces: this.state.pieces.reduce<PieceState[]>(
-                (acc: PieceState[], p: PieceState): PieceState[] => {
-                  if (p === piece) {
-                    acc.push({
-                      type: p.type,
-                      color: p.color,
-                      x: hypothetic.x,
-                      y: hypothetic.y,
-                    });
-                  } else if (p !== hypothetic.piece) {
-                    // on retire de la liste la piece tuée
-                    acc.push(p);
-                  }
-                  return acc;
-                },
-                []
+              pieces: reducePieces(
+                this.state.pieces,
+                piece,
+                hypothetic.x,
+                hypothetic.y,
+                hypothetic.piece
               ),
             });
 
@@ -301,6 +274,33 @@ function flatMovesList(list: MovesList[]): FlatMovesList {
     );
   });
   return out;
+}
+
+function reducePieces(
+  pieces: PieceState[],
+  piece: PieceState,
+  newX: number,
+  newY: number,
+  remove: PieceState = null
+): PieceState[] {
+  return pieces.reduce<PieceState[]>(
+    (acc: PieceState[], p: PieceState): PieceState[] => {
+      if (p === piece) {
+        // si c'est la piece dont il faut modifier la position
+        acc.push({
+          type: p.type,
+          color: p.color,
+          x: newX,
+          y: newY,
+        });
+      } else if (p !== remove) {
+        // on retire de la liste la piece tuée
+        acc.push(p);
+      }
+      return acc;
+    },
+    []
+  );
 }
 
 /**
