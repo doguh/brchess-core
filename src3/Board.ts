@@ -163,40 +163,20 @@ export default class Board {
       const pieceType: PieceType = getPieceType(piece.type);
       const possibleDest: Square[] = [];
       const mandatoryDest: Square[] = [];
-
-      let x: number = 0;
-      let y: number = 0;
-      let repeat: number = 0;
-      let hypothetic: Square = null;
       const from: Square = this.getSquare(piece.x, piece.y);
 
       /**
        * pour chaque piece on teste tous ses mouvements
        * et on ne retient que les possibles
        */
-      pieceType.movements.forEach((movement: Movement) => {
-        repeat = 0;
-        hypothetic = from;
-        // tant que le mouvement peut être répété
-        while (repeat < movement.repeat) {
-          x = hypothetic.x + movement.x * sideMult;
-          y = hypothetic.y + movement.y * sideMult;
-          hypothetic = this.getSquare(x, y);
-          if (
-            // si la case existe
-            hypothetic &&
-            // et qu'elle est vide ou occupée par un ennemi
-            (hypothetic.piece === null ||
-              hypothetic.piece.color !== piece.color) &&
-            // et que la condition du movement est remplie
-            (movement.condition === null ||
-              movement.condition(
-                from,
-                hypothetic,
-                repeat,
-                this.getSquare.bind(this)
-              ))
-          ) {
+      pieceType.movements.forEach(movement =>
+        findPossibleDestinations(
+          piece,
+          movement,
+          from,
+          sideMult as Side,
+          this.getSquare.bind(this),
+          (hypothetic: Square) => {
             /**
              * test if the king will be checked after this move
              */
@@ -219,16 +199,9 @@ export default class Board {
             }
             // case libre
             if (!willCheck) possibleDest.push(hypothetic);
-            // on continue de chercher si ce mouvement est répétable
-            repeat++;
-          } else {
-            // si la case n'existe pas
-            // ou est occupée par un allié
-            // ou la condition du mouvement ne permet pas d'y aller
-            return;
           }
-        }
-      });
+        )
+      );
 
       if (mandatoryDest.length) {
         // si cette case a des mouvements obligatoires, on les enregistre
@@ -358,39 +331,77 @@ export function testCheck(state: {
       let x: number;
       let y: number;
       // TODO trouver un moyen de pas dupliquer ce code dans invalidatePositions et ici
-      return pieceType.movements.some((movement: Movement) => {
-        repeat = 0;
-        hypothetic = from;
-        // tant que le mouvement peut être répété
-        while (repeat < movement.repeat) {
-          x = hypothetic.x + movement.x * sideMult;
-          y = hypothetic.y + movement.y * sideMult;
-          hypothetic = getOrCreateSquare(squares, x, y);
-          if (
-            // si la case existe
-            hypothetic &&
-            // et qu'elle est vide ou occupée par un ennemi
-            (hypothetic.piece === null ||
-              hypothetic.piece.color !== piece.color) &&
-            // et que la condition du movement est remplie
-            (movement.condition === null ||
-              movement.condition(from, hypothetic, repeat, getSquare))
-          ) {
-            if (hypothetic.piece) {
-              // case occupée par un ennemi
-              return hypothetic.piece === king;
+      return pieceType.movements.some(movement =>
+        findPossibleDestinations(
+          piece,
+          movement,
+          from,
+          sideMult,
+          getSquare,
+          (hypothetic: Square) => {
+            if (hypothetic.piece && hypothetic.piece === king) {
+              return true;
             }
-            // on continue de chercher si ce mouvement est répétable
-            repeat++;
-          } else {
-            // si la case n'existe pas
-            // ou est occupée par un allié
-            // ou la condition du mouvement ne permet pas d'y aller
-            return false;
           }
-        }
-        return false;
-      });
+        )
+      );
     });
   return what;
+}
+
+/**
+ * appelle `callback` sur chaque case où ce mouvement permet d'aller
+ *
+ * si `callback` retourne autre chose que `undefined`,
+ * cette fonction s'arrête de tenter de répeter le mouvement et retourne
+ * la valeur retournée par `callback`
+ *
+ * @param piece
+ * @param movement
+ * @param from
+ * @param sideMult
+ * @param getSquare
+ * @param callback
+ */
+function findPossibleDestinations(
+  piece: PieceState,
+  movement: Movement,
+  from: Square,
+  sideMult: Side,
+  getSquare: (x: number, y: number) => Square,
+  callback: (square: Square) => any
+): any {
+  let repeat: number = 0;
+  let hypothetic: Square = from;
+  let x: number;
+  let y: number;
+  // tant que le mouvement peut être répété
+  while (repeat < movement.repeat) {
+    x = hypothetic.x + movement.x * sideMult;
+    y = hypothetic.y + movement.y * sideMult;
+    hypothetic = getSquare(x, y);
+    if (
+      // si la case existe
+      hypothetic &&
+      // et qu'elle est vide ou occupée par un ennemi
+      (hypothetic.piece === null || hypothetic.piece.color !== piece.color) &&
+      // et que la condition du movement est remplie
+      (movement.condition === null ||
+        movement.condition(from, hypothetic, repeat, this.getSquare.bind(this)))
+    ) {
+      const r = callback(hypothetic);
+      if (r !== undefined) return r;
+      if (hypothetic.piece) {
+        // si case occupée, on quitte car on ne pourra pas aller plus loin
+        return;
+      }
+      // la case est libre, on repete pour trouver des cases libres plus loin
+      repeat++;
+    } else {
+      // si la case n'existe pas
+      // ou est occupée par un allié
+      // ou la condition du mouvement ne permet pas d'y aller
+      return;
+    }
+  }
 }
