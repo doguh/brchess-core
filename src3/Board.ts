@@ -276,6 +276,16 @@ function flatMovesList(list: MovesList[]): FlatMovesList {
   return out;
 }
 
+/**
+ * retourne une copie du tableau `pieces`
+ * en créant un nouvel objet à la place de `piece`
+ * avec `x` et `y` mis à jour et en supprimant `remove` du tableau
+ * @param pieces
+ * @param piece
+ * @param newX
+ * @param newY
+ * @param remove
+ */
 function reducePieces(
   pieces: PieceState[],
   piece: PieceState,
