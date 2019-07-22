@@ -18,6 +18,8 @@ export default class Board {
   private squares: Square[];
   private possibleMoves: MovesList[];
   private mandatoryMoves: MovesList[];
+  private currentKing: PieceState;
+  private ennemyKing: PieceState;
 
   constructor(state: BoardState = null) {
     const len = WIDTH * HEIGHT;
@@ -43,7 +45,17 @@ export default class Board {
       this.state.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = null));
     }
     // map new state positions
-    nextState.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = p));
+    nextState.pieces.forEach(p => {
+      this.getSquare(p.x, p.y).piece = p;
+      // ref kings for faster check test
+      if (p.type === 'k') {
+        if (p.color === nextState.whoseTurn) {
+          this.currentKing = p;
+        } else {
+          this.ennemyKing = p;
+        }
+      }
+    });
 
     this.state = nextState;
     this.invalidatePossibleMoves();
@@ -192,14 +204,33 @@ export default class Board {
                 repeat
               ))
           ) {
+            testCheck({
+              king: this.currentKing,
+              pieces: this.state.pieces.reduce<PieceState[]>(
+                (acc: PieceState[], p: PieceState): PieceState[] => {
+                  if (p === piece) {
+                    acc.push({
+                      type: p.type,
+                      color: p.color,
+                      x: hypothetic.x,
+                      y: hypothetic.y,
+                    });
+                  } else if (p !== hypothetic.piece) {
+                    // on retire de la liste la piece tuée
+                    acc.push(p);
+                  }
+                  return acc;
+                },
+                []
+              ),
+            });
+
             if (hypothetic.piece) {
               // case occupée par un ennemi, mouvement obligatoire
-              // TODO check for check after this move
               mandatoryDest.push(hypothetic);
               return;
             }
             // case libre
-            // TODO check for check after this move
             possibleDest.push(hypothetic);
             // on continue de chercher si ce mouvement est répétable
             repeat++;
@@ -254,4 +285,15 @@ function flatMovesList(list: MovesList[]): FlatMovesList {
     );
   });
   return out;
+}
+
+/**
+ * test if the king can be killed by an opponent
+ * @param state
+ */
+export function testCheck(state: {
+  king: { x: number; y: number };
+  pieces: PieceState[];
+}): boolean {
+  return false;
 }
