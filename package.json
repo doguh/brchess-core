@@ -2,9 +2,10 @@
   "name": "brchess-core",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "build": "tsc",
     "test": "ts-node src3/index.ts"
   },
   "author": "",
