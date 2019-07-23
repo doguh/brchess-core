@@ -383,7 +383,7 @@ function findPossibleDestinations(
       (hypothetic.piece === null || hypothetic.piece.color !== piece.color) &&
       // et que la condition du movement est remplie
       (movement.condition === null ||
-        movement.condition(from, hypothetic, repeat, this.getSquare.bind(this)))
+        movement.condition(from, hypothetic, repeat, getSquare))
     ) {
       const r = callback(hypothetic);
       if (r !== undefined) return r;
