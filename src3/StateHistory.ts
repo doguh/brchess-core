@@ -44,6 +44,7 @@ export default class StateHistory<T> implements IStateHistory<T> {
   }
 
   goPrev(): T {
+    // could do go(-1) but this is faster
     const newPresent = this.past.pop();
     this.future.splice(0, 0, this.present);
     this.present = newPresent;
