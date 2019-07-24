@@ -22,6 +22,8 @@ export default class Board {
   private currentKing: PieceState;
   private ennemyKing: PieceState;
   private _isCheck: boolean = false;
+  private _isCheckMate: boolean = false;
+  private _isPat: boolean = false;
 
   constructor(state: BoardState = null) {
     const len = WIDTH * HEIGHT;
@@ -43,6 +45,14 @@ export default class Board {
 
   get isCheck(): boolean {
     return this._isCheck;
+  }
+
+  get isCheckMate(): boolean {
+    return this._isCheckMate;
+  }
+
+  get isPat(): boolean {
+    return this._isPat;
   }
 
   setState(nextState: BoardState) {
@@ -148,7 +158,7 @@ export default class Board {
       pieces: this.state.pieces,
       whiteSide: this.state.whiteSide,
     });
-    // TODO maybe dispatch an event
+    // TODO maybe dispatch an event if check
 
     this.possibleMoves = [];
     this.mandatoryMoves = [];
@@ -215,6 +225,12 @@ export default class Board {
         });
       }
     });
+
+    const noLegalMove: boolean =
+      this.mandatoryMoves.length === 0 && this.possibleMoves.length === 0;
+    this._isCheckMate = noLegalMove && this._isCheck;
+    this._isPat = noLegalMove && !this._isCheck;
+    // TODO maybe dispatch an event if checkMate or pat
   }
 }
 
