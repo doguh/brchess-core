@@ -10,13 +10,13 @@ const b = new Board(getDefaultBoardState());
 // console.log(b.getSquare(4, 0));
 // console.log(b.getSquare(4, 7));
 
-let mandatoryMoves = b.getMandatoryMoves();
+let mandatoryMoves = b.getLegalMovesFlat();
 console.log('mandatory moves:', mandatoryMoves);
 
 b.move(4, 0, 4, 7);
 
-mandatoryMoves = b.getMandatoryMoves();
-console.log('mandatory moves:', b.getMandatoryMoves());
+mandatoryMoves = b.getLegalMovesFlat();
+console.log('mandatory moves:', b.getLegalMovesFlat());
 
 b.move(
   mandatoryMoves[0].x,
@@ -25,8 +25,8 @@ b.move(
   mandatoryMoves[0].toY
 );
 
-mandatoryMoves = b.getMandatoryMoves();
-console.log('mandatory moves:', b.getMandatoryMoves());
+mandatoryMoves = b.getLegalMovesFlat();
+console.log('mandatory moves:', b.getLegalMovesFlat());
 
 // console.log(b.getSquare(4, 0));
 // console.log(b.getSquare(4, 7));

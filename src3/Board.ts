@@ -97,24 +97,11 @@ export default class Board {
       );
     }
 
-    if (this.mandatoryMoves.length) {
-      /**
-       * si il y a des mouvements obligatoires,
-       * on vérifie que le mouvement en fait partie
-       */
-      if (!isMoveInList(x, y, toX, toY, this.mandatoryMoves)) {
-        throw new Error(
-          'Cannot make this move because there are mandatory moves'
-        );
-      }
-    } else {
-      /**
-       * si il n'y a pas de mouvement obligatoire,
-       * on vérifie que le mouvement est possible
-       */
-      if (!isMoveInList(x, y, toX, toY, this.possibleMoves)) {
-        throw new Error('Illegal move');
-      }
+    const legalMoves = this.mandatoryMoves.length
+      ? this.mandatoryMoves
+      : this.possibleMoves;
+    if (!isMoveInList(x, y, toX, toY, legalMoves)) {
+      throw new Error('Illegal move');
     }
 
     // si il y a une piece sur la case d'arrivée, elle est tuée
@@ -129,12 +116,18 @@ export default class Board {
     });
   }
 
-  getMandatoryMoves(): FlatMovesList {
-    return flatMovesList(this.mandatoryMoves);
+  getLegalMoves(): MovesList[] {
+    const legalMoves: MovesList[] = this.mandatoryMoves.length
+      ? this.mandatoryMoves
+      : this.possibleMoves;
+    // clone moves to be sure user dont mutate them
+    return legalMoves.map(m => ({ ...m }));
   }
 
-  getPossibleMoves(): FlatMovesList {
-    return flatMovesList(this.possibleMoves);
+  getLegalMovesFlat(): FlatMovesList {
+    return this.mandatoryMoves.length
+      ? flatMovesList(this.mandatoryMoves)
+      : flatMovesList(this.possibleMoves);
   }
 
   invalidatePossibleMoves(): void {
