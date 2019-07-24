@@ -10,6 +10,7 @@ import {
   Side,
 } from './types';
 import { getPieceType } from './pieces';
+import { StateHistoryEmitter } from './StateHistory';
 
 const WIDTH = 8;
 const HEIGHT = 8;
@@ -24,6 +25,7 @@ export default class Board {
   private _isCheck: boolean = false;
   private _isCheckMate: boolean = false;
   private _isPat: boolean = false;
+  private _history: StateHistoryEmitter<BoardState>;
 
   constructor(state: BoardState = null) {
     const len = WIDTH * HEIGHT;
@@ -37,6 +39,9 @@ export default class Board {
       color = x % 2 === y % 2 ? 0 : 1;
       this.squares[i] = { x, y, color, piece: null };
     }
+
+    this._history = new StateHistoryEmitter<BoardState>();
+    this._history.subscribe(this.onStateChange);
 
     if (state) {
       this.setState(state);
@@ -55,7 +60,15 @@ export default class Board {
     return this._isPat;
   }
 
+  get history(): StateHistoryEmitter<BoardState> {
+    return this._history;
+  }
+
   setState(nextState: BoardState) {
+    this._history.push(nextState);
+  }
+
+  private onStateChange = (nextState: BoardState) => {
     console.log('setState');
     // demap old state positions
     if (this.state) {
@@ -76,7 +89,7 @@ export default class Board {
 
     this.state = nextState;
     this.invalidatePossibleMoves();
-  }
+  };
 
   getState(): BoardState {
     return this.state;
@@ -145,7 +158,7 @@ export default class Board {
       : flatMovesList(this.possibleMoves);
   }
 
-  invalidatePossibleMoves(): void {
+  private invalidatePossibleMoves(): void {
     console.log('invalidate possible moves');
     // multiplicateur des mouvements selon le côté du joueur (1 ou -1):
     // les pions ne pouvant aller qu'en avant (y=1),
@@ -231,6 +244,10 @@ export default class Board {
     this._isCheckMate = noLegalMove && this._isCheck;
     this._isPat = noLegalMove && !this._isCheck;
     // TODO maybe dispatch an event if checkMate or pat
+  }
+
+  destroy(): void {
+    this._history.unsubscribe(this.onStateChange);
   }
 }
 

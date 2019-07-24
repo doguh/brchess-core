@@ -36,4 +36,12 @@ console.log('mandatory moves:', b.getLegalMovesFlat());
 // console.log(b.getSquare(5, 7));
 // console.log(b.getSquare(7, 7));
 
+console.log('4,7:', b.getSquare(4, 7));
+console.log('go prev');
+b.history.goPrev();
+console.log('4,7:', b.getSquare(4, 7));
+console.log('go prev');
+b.history.goPrev();
+console.log('4,7:', b.getSquare(4, 7));
+
 console.log(Date.now() - t + 'ms');
