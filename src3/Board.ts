@@ -141,7 +141,7 @@ export default class Board {
     const isCheck: boolean = testCheck({
       king: this.currentKing,
       pieces: this.state.pieces,
-      sideMult: sideMult as Side,
+      whiteSide: this.state.whiteSide,
     });
     console.log('is check:', isCheck);
 
@@ -175,7 +175,7 @@ export default class Board {
              */
             const willCheck: boolean = testCheck({
               king: this.currentKing,
-              sideMult: sideMult as Side,
+              whiteSide: this.state.whiteSide,
               pieces: reducePieces(
                 this.state.pieces,
                 piece,
@@ -305,10 +305,11 @@ function getOrCreateSquare(squares: Square[], x: number, y: number): Square {
 export function testCheck(state: {
   king: PieceState;
   pieces: PieceState[];
-  sideMult: Side;
+  whiteSide: Side;
 }): boolean {
   const squares: Square[] = [];
-  const { king, pieces, sideMult } = state;
+  const { king, pieces, whiteSide } = state;
+  const sideMult: Side = (king.color === 0 ? -whiteSide : whiteSide) as Side;
   const getSquare = (x: number, y: number) => getOrCreateSquare(squares, x, y);
   const what = pieces
     .filter((piece, i) => {
@@ -319,7 +320,6 @@ export function testCheck(state: {
       // apply piece movements
       const pieceType: PieceType = getPieceType(piece.type);
       const from: Square = getOrCreateSquare(squares, piece.x, piece.y);
-      // TODO trouver un moyen de pas dupliquer ce code dans invalidatePositions et ici
       return pieceType.movements.some(movement =>
         findPossibleDestinations(
           piece,
