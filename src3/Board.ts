@@ -10,7 +10,7 @@ import {
   Side,
 } from './types';
 import { getPieceType } from './pieces';
-import { StateHistoryEmitter } from './StateHistory';
+import { StateHistoryEmitter } from 'state-history';
 
 const WIDTH = 8;
 const HEIGHT = 8;

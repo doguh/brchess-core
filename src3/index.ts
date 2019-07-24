@@ -1,48 +1,21 @@
 import Board from './Board';
 import getDefaultBoardState from './state';
-import StateHistory from './StateHistory';
+import StateHistory from 'state-history';
 
-const h = new StateHistory();
+// const h = new StateHistory();
+// let t = Date.now();
+// for (let i = 0; i < 10000000; i++) {
+//   if (i % 2) h.goNext();
+//   else h.goPrev();
+// }
+// console.log('goPrev/goNext:', Date.now() - t + 'ms');
 
-h.push({ a: 1 });
-h.push({ a: 2 });
-h.push({ a: 3 });
-h.push({ a: 4 });
-h.push({ a: 5 });
-h.push({ a: 6 });
-h.push({ a: 7 });
-h.push({ a: 8 });
-h.push({ a: 9 });
-
-h.go(-4);
-console.log(h);
-
-let t = Date.now();
-for (let i = 0; i < 10000000; i++) {
-  if (i % 2) h.goNext();
-  else h.goPrev();
-}
-console.log('goPrev/goNext:', Date.now() - t + 'ms');
-
-t = Date.now();
-for (let i = 0; i < 10000000; i++) {
-  if (i % 2) h.go(1);
-  else h.go(-1);
-}
-console.log('go-1/go+1:', Date.now() - t + 'ms');
-
-// h.goPrev();
-// console.log(h);
-// h.goPrev();
-// console.log(h);
-// h.goPrev();
-// console.log(h);
-// h.goNext();
-// console.log(h);
-// h.goNext();
-// console.log(h);
-// h.goLast();
-// console.log(h);
+// t = Date.now();
+// for (let i = 0; i < 10000000; i++) {
+//   if (i % 2) h.go(1);
+//   else h.go(-1);
+// }
+// console.log('go-1/go+1:', Date.now() - t + 'ms');
 
 // let t = Date.now();
 
