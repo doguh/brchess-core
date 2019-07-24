@@ -212,7 +212,7 @@ export default class Board {
       );
 
       if (mandatoryDest.length) {
-        // si cette case a des mouvements obligatoires, on les enregistre
+        // si cette pièce a des mouvements obligatoires, on les enregistre
         this.mandatoryMoves.push({
           from: from,
           to: mandatoryDest,
