@@ -114,6 +114,10 @@ export class StateHistoryEmitter<T> extends StateHistory<T>
     }
   }
 
+  unsubscribeAll(): void {
+    this.subscribers.length = 0;
+  }
+
   private emit(state: T): void {
     this.subscribers.forEach(callback => callback(state));
   }
