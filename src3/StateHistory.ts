@@ -64,6 +64,28 @@ export default class StateHistory<T> implements IStateHistory<T> {
     return this.present;
   }
 
+  go(i: number): T {
+    if (i === 0) {
+      return this.present;
+    }
+    if (i > 0) {
+      const newPresent = this.future.splice(i - 1, 1)[0];
+      this.past = [...this.past, this.present, ...this.future.splice(0, i - 1)];
+      this.present = newPresent;
+      return this.present;
+    } else {
+      const start = this.past.length + i;
+      const newPresent = this.past.splice(start, 1)[0];
+      this.future = [
+        ...this.past.splice(start, this.past.length - start),
+        this.present,
+        ...this.future,
+      ];
+      this.present = newPresent;
+      return this.present;
+    }
+  }
+
   get(i: number): T {
     if (i === 0) {
       return this.present;
@@ -114,6 +136,12 @@ export class StateHistoryEmitter<T> extends StateHistory<T>
 
   goLast(): T {
     const state = super.goLast();
+    this.emit(state);
+    return state;
+  }
+
+  go(i: number): T {
+    const state = super.go(i);
     this.emit(state);
     return state;
   }
