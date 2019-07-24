@@ -21,6 +21,7 @@ export default class Board {
   private mandatoryMoves: MovesList[];
   private currentKing: PieceState;
   private ennemyKing: PieceState;
+  private _isCheck: boolean = false;
 
   constructor(state: BoardState = null) {
     const len = WIDTH * HEIGHT;
@@ -38,6 +39,10 @@ export default class Board {
     if (state) {
       this.setState(state);
     }
+  }
+
+  get isCheck(): boolean {
+    return this._isCheck;
   }
 
   setState(nextState: BoardState) {
@@ -138,12 +143,12 @@ export default class Board {
     const sideMult: number =
       this.state.whoseTurn === 0 ? this.state.whiteSide : -this.state.whiteSide;
 
-    const isCheck: boolean = testCheck({
+    this._isCheck = testCheck({
       king: this.currentKing,
       pieces: this.state.pieces,
       whiteSide: this.state.whiteSide,
     });
-    console.log('is check:', isCheck);
+    // TODO maybe dispatch an event
 
     this.possibleMoves = [];
     this.mandatoryMoves = [];
