@@ -23,7 +23,10 @@ export default class Board {
   private _isCheck: boolean = false;
   private _isCheckMate: boolean = false;
   private _isPat: boolean = false;
+  private _isWin: boolean = false;
+  private _winner: Color = undefined;
   private _history: StateHistory<BoardState>;
+  private _piecesLeft: number[] = [0, 0];
 
   constructor(state: BoardState = null) {
     const len = WIDTH * HEIGHT;
@@ -58,6 +61,14 @@ export default class Board {
     return this._isPat;
   }
 
+  get isWin(): boolean {
+    return this._isWin;
+  }
+
+  get winner(): Color {
+    return this._winner;
+  }
+
   get history(): StateHistory<BoardState> {
     return this._history;
   }
@@ -73,10 +84,22 @@ export default class Board {
       this.state.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = null));
     }
     // map new state positions
-    nextState.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = p));
+    this._piecesLeft[0] = this._piecesLeft[1] = 0;
+    nextState.pieces.forEach(p => {
+      this.getSquare(p.x, p.y).piece = p;
+      this._piecesLeft[p.color]++;
+    });
 
     this.state = nextState;
     this.invalidatePossibleMoves();
+
+    this._isWin = this._piecesLeft[0] === 1 || this._piecesLeft[1] === 1;
+    this._winner = this._isWin
+      ? this._piecesLeft[0] === 1
+        ? 0
+        : 1
+      : undefined;
+    // TODO maybe dispatch win event
   };
 
   getState(): BoardState {
