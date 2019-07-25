@@ -7,5 +7,5 @@
     "strict": true,
     "strictNullChecks": false
   },
-  "include": ["src3"]
+  "include": ["src3/index.ts"]
 }
