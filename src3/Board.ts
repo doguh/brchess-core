@@ -11,6 +11,7 @@ import {
 } from './types';
 import { getPieceType } from './pieces';
 import { StateHistory } from 'state-history';
+import { White, Black } from './constantes';
 
 const WIDTH = 8;
 const HEIGHT = 8;
@@ -37,7 +38,7 @@ export default class Board {
     for (let i: number = 0; i < len; i++) {
       x = i % WIDTH;
       x === 0 && i > 0 && y++;
-      color = x % 2 === y % 2 ? 0 : 1;
+      color = x % 2 === y % 2 ? White : Black;
       this.squares[i] = { x, y, color, piece: null };
     }
 
@@ -84,7 +85,7 @@ export default class Board {
       this.state.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = null));
     }
     // map new state positions
-    this._piecesLeft[0] = this._piecesLeft[1] = 0;
+    this._piecesLeft[White] = this._piecesLeft[Black] = 0;
     nextState.pieces.forEach(p => {
       this.getSquare(p.x, p.y).piece = p;
       this._piecesLeft[p.color]++;
@@ -92,11 +93,12 @@ export default class Board {
 
     this.state = nextState;
 
-    this._isWin = this._piecesLeft[0] === 1 || this._piecesLeft[1] === 1;
+    this._isWin =
+      this._piecesLeft[White] === 1 || this._piecesLeft[Black] === 1;
     this._winner = this._isWin
-      ? this._piecesLeft[0] === 1
-        ? 0
-        : 1
+      ? this._piecesLeft[White] === 1
+        ? White
+        : Black
       : undefined;
     this._isCheck =
       !this._isWin &&
@@ -162,7 +164,7 @@ export default class Board {
 
     this.setState({
       whiteSide: this.state.whiteSide,
-      whoseTurn: ((this.state.whoseTurn + 1) % 2) as Color,
+      whoseTurn: this.state.whoseTurn === White ? Black : White,
       pieces: reducePieces(this.state.pieces, piece, toX, toY, killed),
     });
 
@@ -365,7 +367,7 @@ export function testCheck(state: {
 }): boolean {
   const squares: Square[] = [];
   const { whoseKing, pieces, whiteSide } = state;
-  const sideMult: Side = (whoseKing === 0 ? -whiteSide : whiteSide) as Side;
+  const sideMult: Side = (whoseKing === White ? -whiteSide : whiteSide) as Side;
   const getSquare = (x: number, y: number) => getOrCreateSquare(squares, x, y);
   const what = pieces
     .filter((piece, i) => {
