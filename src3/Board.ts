@@ -91,7 +91,6 @@ export default class Board {
     });
 
     this.state = nextState;
-    this.invalidatePossibleMoves();
 
     this._isWin = this._piecesLeft[0] === 1 || this._piecesLeft[1] === 1;
     this._winner = this._isWin
@@ -99,7 +98,22 @@ export default class Board {
         ? 0
         : 1
       : undefined;
+    this._isCheck =
+      !this._isWin &&
+      testCheck({
+        whoseKing: this.state.whoseTurn,
+        pieces: this.state.pieces,
+        whiteSide: this.state.whiteSide,
+      });
+
+    if (!this._isWin) {
+      this.invalidatePossibleMoves();
+    } else {
+      this.possibleMoves = this.mandatoryMoves = [];
+    }
+
     // TODO maybe dispatch win event
+    // TODO maybe dispatch check event
   };
 
   getState(): BoardState {
@@ -146,13 +160,13 @@ export default class Board {
     // si il y a une piece sur la case d'arrivée, elle est tuée
     const killed: PieceState = this.getPiece(toX, toY);
 
-    // TODO maybe dispatch move and kill events
-
     this.setState({
       whiteSide: this.state.whiteSide,
       whoseTurn: ((this.state.whoseTurn + 1) % 2) as Color,
       pieces: reducePieces(this.state.pieces, piece, toX, toY, killed),
     });
+
+    // TODO maybe dispatch move and kill events
   }
 
   getLegalMoves(): MovesList[] {
@@ -176,13 +190,6 @@ export default class Board {
     // on multiplie le mouvement par -1 pour le joueur du haut
     const sideMult: number =
       this.state.whoseTurn === 0 ? this.state.whiteSide : -this.state.whiteSide;
-
-    this._isCheck = testCheck({
-      whoseKing: this.state.whoseTurn,
-      pieces: this.state.pieces,
-      whiteSide: this.state.whiteSide,
-    });
-    // TODO maybe dispatch an event if check
 
     this.possibleMoves = [];
     this.mandatoryMoves = [];
