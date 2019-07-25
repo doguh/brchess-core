@@ -167,7 +167,7 @@ export default class Board {
       this.state.whoseTurn === 0 ? this.state.whiteSide : -this.state.whiteSide;
 
     this._isCheck = testCheck({
-      king: this.currentKing,
+      whoseKing: this.currentKing.color,
       pieces: this.state.pieces,
       whiteSide: this.state.whiteSide,
     });
@@ -202,7 +202,7 @@ export default class Board {
              * test if the king will be checked after this move
              */
             const willCheck: boolean = testCheck({
-              king: this.currentKing,
+              whoseKing: this.currentKing.color,
               whiteSide: this.state.whiteSide,
               pieces: reducePieces(
                 this.state.pieces,
@@ -341,18 +341,18 @@ function getOrCreateSquare(squares: Square[], x: number, y: number): Square {
  * @param state
  */
 export function testCheck(state: {
-  king: PieceState;
+  whoseKing: Color;
   pieces: PieceState[];
   whiteSide: Side;
 }): boolean {
   const squares: Square[] = [];
-  const { king, pieces, whiteSide } = state;
-  const sideMult: Side = (king.color === 0 ? -whiteSide : whiteSide) as Side;
+  const { whoseKing, pieces, whiteSide } = state;
+  const sideMult: Side = (whoseKing === 0 ? -whiteSide : whiteSide) as Side;
   const getSquare = (x: number, y: number) => getOrCreateSquare(squares, x, y);
   const what = pieces
     .filter((piece, i) => {
       getOrCreateSquare(squares, piece.x, piece.y).piece = piece;
-      return piece.color !== king.color;
+      return piece.color !== whoseKing;
     })
     .some(piece => {
       // apply piece movements
@@ -366,7 +366,11 @@ export function testCheck(state: {
           sideMult,
           getSquare,
           (hypothetic: Square): true | void => {
-            if (hypothetic.piece && hypothetic.piece === king) {
+            if (
+              hypothetic.piece &&
+              hypothetic.piece.type === 'k' &&
+              hypothetic.piece.color === whoseKing
+            ) {
               return true;
             }
           }
