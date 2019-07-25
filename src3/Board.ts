@@ -20,8 +20,6 @@ export default class Board {
   private squares: Square[];
   private possibleMoves: MovesList[];
   private mandatoryMoves: MovesList[];
-  private currentKing: PieceState;
-  private ennemyKing: PieceState;
   private _isCheck: boolean = false;
   private _isCheckMate: boolean = false;
   private _isPat: boolean = false;
@@ -75,17 +73,7 @@ export default class Board {
       this.state.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = null));
     }
     // map new state positions
-    nextState.pieces.forEach(p => {
-      this.getSquare(p.x, p.y).piece = p;
-      // ref kings for faster check test
-      if (p.type === 'k') {
-        if (p.color === nextState.whoseTurn) {
-          this.currentKing = p;
-        } else {
-          this.ennemyKing = p;
-        }
-      }
-    });
+    nextState.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = p));
 
     this.state = nextState;
     this.invalidatePossibleMoves();
@@ -167,7 +155,7 @@ export default class Board {
       this.state.whoseTurn === 0 ? this.state.whiteSide : -this.state.whiteSide;
 
     this._isCheck = testCheck({
-      whoseKing: this.currentKing.color,
+      whoseKing: this.state.whoseTurn,
       pieces: this.state.pieces,
       whiteSide: this.state.whiteSide,
     });
@@ -202,7 +190,7 @@ export default class Board {
              * test if the king will be checked after this move
              */
             const willCheck: boolean = testCheck({
-              whoseKing: this.currentKing.color,
+              whoseKing: this.state.whoseTurn,
               whiteSide: this.state.whiteSide,
               pieces: reducePieces(
                 this.state.pieces,
