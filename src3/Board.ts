@@ -10,7 +10,7 @@ import {
   Side,
 } from './types';
 import { getPieceType } from './pieces';
-import { StateHistoryEmitter } from 'state-history';
+import { StateHistory } from 'state-history';
 
 const WIDTH = 8;
 const HEIGHT = 8;
@@ -25,7 +25,7 @@ export default class Board {
   private _isCheck: boolean = false;
   private _isCheckMate: boolean = false;
   private _isPat: boolean = false;
-  private _history: StateHistoryEmitter<BoardState>;
+  private _history: StateHistory<BoardState>;
 
   constructor(state: BoardState = null) {
     const len = WIDTH * HEIGHT;
@@ -40,7 +40,7 @@ export default class Board {
       this.squares[i] = { x, y, color, piece: null };
     }
 
-    this._history = new StateHistoryEmitter<BoardState>();
+    this._history = new StateHistory<BoardState>();
     this._history.subscribe(this.onStateChange);
 
     if (state) {
@@ -60,7 +60,7 @@ export default class Board {
     return this._isPat;
   }
 
-  get history(): StateHistoryEmitter<BoardState> {
+  get history(): StateHistory<BoardState> {
     return this._history;
   }
 
