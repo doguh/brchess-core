@@ -181,9 +181,6 @@ export default class Board {
 
   private invalidatePossibleMoves(): void {
     console.log('invalidate possible moves');
-    // multiplicateur des mouvements selon le côté du joueur
-    // 1 pour le joueur du bas (blanc) et -1 pour le joueur du haut (noir)
-    const sideMult: number = this.state.whoseTurn === White ? 1 : -1;
 
     this.possibleMoves = [];
     this.mandatoryMoves = [];
@@ -207,7 +204,6 @@ export default class Board {
           piece,
           movement,
           from,
-          sideMult,
           this.getSquare.bind(this),
           (hypothetic: Square): void => {
             /**
@@ -357,7 +353,6 @@ export function testCheck(state: {
 }): boolean {
   const squares: Square[] = [];
   const { whoseKing, pieces } = state;
-  const sideMult: number = whoseKing === White ? -1 : 1;
   const getSquare = (x: number, y: number) => getOrCreateSquare(squares, x, y);
   const what = pieces
     .filter((piece, i) => {
@@ -373,7 +368,6 @@ export function testCheck(state: {
           piece,
           movement,
           from,
-          sideMult,
           getSquare,
           (hypothetic: Square): true | void => {
             if (
@@ -400,7 +394,6 @@ export function testCheck(state: {
  * @param piece
  * @param movement
  * @param from
- * @param sideMult
  * @param getSquare
  * @param callback
  */
@@ -408,10 +401,12 @@ function findPossibleDestinations(
   piece: PieceState,
   movement: Movement,
   from: Square,
-  sideMult: number,
   getSquare: (x: number, y: number) => Square,
   callback: (square: Square) => any
 ): any {
+  // multiplicateur des mouvements selon le côté du joueur
+  // 1 pour le joueur du bas (blanc) et -1 pour le joueur du haut (noir)
+  const sideMult: number = piece.color === White ? 1 : -1;
   let repeat: number = 0;
   let hypothetic: Square = from;
   let x: number;
