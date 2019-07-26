@@ -1,4 +1,5 @@
-import { PieceType, MovementCondition } from './types';
+import { PieceType, MovementCondition, Square } from './types';
+import { White } from './constantes';
 
 const types: { [key: string]: PieceType } = {};
 
@@ -82,12 +83,26 @@ export const Rook = registerPieceType({
   ],
 });
 
-// export const Pawn = registerPieceType({
-//   key: '',
-//   movements: [
-//     makeMove(0, 1, 1, conditionEmpty),
-//     makeMove(0, 2, 1, conditionFirstMove),
-//     makeMove(1, 1, 1, killCondition),
-//     makeMove(-1, 1, 1, killCondition),
-//   ],
-// });
+const canPawnDoubleMove = (from: Square): boolean => {
+  return from.piece.color === White ? from.y <= 2 : from.y >= 5;
+};
+
+const pawnMove: MovementCondition = (from, to, repeat, getSquare) => {
+  return (
+    (repeat === 0 || (repeat === 1 && canPawnDoubleMove(from))) &&
+    to.piece === null
+  );
+};
+
+const pawnKill: MovementCondition = (from, to, repeat, getSquare) => {
+  return !!to.piece;
+};
+
+export const Pawn = registerPieceType({
+  key: '',
+  movements: [
+    makeMove(0, 1, 2, pawnMove),
+    makeMove(1, 1, 1, pawnKill),
+    makeMove(-1, 1, 1, pawnKill),
+  ],
+});
