@@ -1,13 +1,10 @@
-import { BoardState, Side, Color } from './types';
-import { White, Black, Bottom } from './constantes';
+import { BoardState, Color } from './types';
+import { White, Black } from './constantes';
 
-export default function getDefaultBoardState(
-  whiteSide: Side = Bottom
-): BoardState {
-  const botColor: Color = whiteSide === Bottom ? White : Black;
-  const topColor: Color = whiteSide === Bottom ? Black : White;
+export default function getDefaultBoardState(): BoardState {
+  const botColor: Color = White;
+  const topColor: Color = Black;
   return {
-    whiteSide,
     whoseTurn: White,
     pieces: [
       /**
@@ -32,13 +29,13 @@ export default function getDefaultBoardState(
         color: botColor,
       },
       {
-        type: whiteSide === 1 ? 'k' : 'q',
+        type: botColor === White ? 'k' : 'q',
         x: 3,
         y: 0,
         color: botColor,
       },
       {
-        type: whiteSide === 1 ? 'q' : 'k',
+        type: botColor === White ? 'q' : 'k',
         x: 4,
         y: 0,
         color: botColor,
@@ -83,13 +80,13 @@ export default function getDefaultBoardState(
         color: topColor,
       },
       {
-        type: whiteSide === 1 ? 'k' : 'q',
+        type: botColor === White ? 'k' : 'q',
         x: 3,
         y: 7,
         color: topColor,
       },
       {
-        type: whiteSide === 1 ? 'q' : 'k',
+        type: botColor === White ? 'q' : 'k',
         x: 4,
         y: 7,
         color: topColor,

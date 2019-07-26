@@ -1,9 +1,6 @@
-import Board from './Board';
-
 export type PieceState = { type: string; color: Color; x: number; y: number };
 
 export type BoardState = {
-  whiteSide: Side;
   whoseTurn: Color;
   pieces: PieceState[];
 };
@@ -43,11 +40,6 @@ export type MovesList = {
   from: { x: number; y: number };
   to: { x: number; y: number }[];
 };
-
-/**
- * `1` = bottom, `-1` = top
- */
-export type Side = 1 | -1;
 
 export type FlatMovesList = {
   x: number;

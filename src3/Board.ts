@@ -7,14 +7,10 @@ import {
   PieceType,
   Movement,
   FlatMovesList,
-  Side,
 } from './types';
 import { getPieceType } from './pieces';
 import { StateHistory } from 'state-history';
-import { White, Black } from './constantes';
-
-const WIDTH = 8;
-const HEIGHT = 8;
+import { White, Black, WIDTH, HEIGHT } from './constantes';
 
 export default class Board {
   private state: BoardState;
@@ -105,7 +101,6 @@ export default class Board {
       testCheck({
         whoseKing: this.state.whoseTurn,
         pieces: this.state.pieces,
-        whiteSide: this.state.whiteSide,
       });
 
     if (!this._isWin) {
@@ -163,7 +158,6 @@ export default class Board {
     const killed: PieceState = this.getPiece(toX, toY);
 
     this.setState({
-      whiteSide: this.state.whiteSide,
       whoseTurn: this.state.whoseTurn === White ? Black : White,
       pieces: reducePieces(this.state.pieces, piece, toX, toY, killed),
     });
@@ -187,11 +181,9 @@ export default class Board {
 
   private invalidatePossibleMoves(): void {
     console.log('invalidate possible moves');
-    // multiplicateur des mouvements selon le côté du joueur (1 ou -1):
-    // les pions ne pouvant aller qu'en avant (y=1),
-    // on multiplie le mouvement par -1 pour le joueur du haut
-    const sideMult: number =
-      this.state.whoseTurn === 0 ? this.state.whiteSide : -this.state.whiteSide;
+    // multiplicateur des mouvements selon le côté du joueur
+    // 1 pour le joueur du bas (blanc) et -1 pour le joueur du haut (noir)
+    const sideMult: number = this.state.whoseTurn === White ? 1 : -1;
 
     this.possibleMoves = [];
     this.mandatoryMoves = [];
@@ -215,7 +207,7 @@ export default class Board {
           piece,
           movement,
           from,
-          sideMult as Side,
+          sideMult,
           this.getSquare.bind(this),
           (hypothetic: Square): void => {
             /**
@@ -223,7 +215,6 @@ export default class Board {
              */
             const willCheck: boolean = testCheck({
               whoseKing: this.state.whoseTurn,
-              whiteSide: this.state.whiteSide,
               pieces: reducePieces(
                 this.state.pieces,
                 piece,
@@ -363,11 +354,10 @@ function getOrCreateSquare(squares: Square[], x: number, y: number): Square {
 export function testCheck(state: {
   whoseKing: Color;
   pieces: PieceState[];
-  whiteSide: Side;
 }): boolean {
   const squares: Square[] = [];
-  const { whoseKing, pieces, whiteSide } = state;
-  const sideMult: Side = (whoseKing === White ? -whiteSide : whiteSide) as Side;
+  const { whoseKing, pieces } = state;
+  const sideMult: number = whoseKing === White ? -1 : 1;
   const getSquare = (x: number, y: number) => getOrCreateSquare(squares, x, y);
   const what = pieces
     .filter((piece, i) => {
@@ -418,7 +408,7 @@ function findPossibleDestinations(
   piece: PieceState,
   movement: Movement,
   from: Square,
-  sideMult: Side,
+  sideMult: number,
   getSquare: (x: number, y: number) => Square,
   callback: (square: Square) => any
 ): any {
