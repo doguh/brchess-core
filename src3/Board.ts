@@ -94,7 +94,7 @@ export default class Board {
       this._piecesLeft[p.color]++;
 
       // si on a un pion sur la derniere ligne, il doit être promu
-      if (p.type === Pawn.key && p.y === (p.color === White ? 7 : 0)) {
+      if (p.type === Pawn.key && p.y === (p.color === White ? HEIGHT - 1 : 0)) {
         this._mustPromote = p;
       }
     });

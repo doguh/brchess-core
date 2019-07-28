@@ -1,5 +1,5 @@
 import { BoardState, Color, PieceState } from './types';
-import { White, Black } from './constantes';
+import { White, Black, WIDTH, HEIGHT } from './constantes';
 import { King, Queen, Bishop, Knight, Rook, Pawn } from './pieces';
 
 export default function getDefaultBoardState(): BoardState {
@@ -229,7 +229,7 @@ export function getRandomBoardState(): BoardState {
         piece.color === White ? whiteBishop : blackBishop;
       if (color === matesColor) {
         // les 2 fous sont sur une case de même couleur, on décale le 2e d'une case
-        moveAndSwap(piece, (piece.x + 1) % 8, piece.y, state.pieces);
+        moveAndSwap(piece, (piece.x + 1) % WIDTH, piece.y, state.pieces);
       }
       if (piece.color === White) {
         whiteBishop = color;
@@ -263,11 +263,11 @@ function getPieceAt(pieces: any, x: number, y: number): PieceState {
 
 function getRandomPos(piece: PieceState): { x: number; y: number } {
   const out = {
-    x: Math.floor(Math.random() * 8),
+    x: Math.floor(Math.random() * WIDTH),
     y: Math.floor(Math.random() * 3),
   };
   if (piece.color === Black) {
-    out.y = 7 - out.y;
+    out.y = HEIGHT - 1 - out.y;
   }
   return out;
 }
