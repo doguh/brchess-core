@@ -143,6 +143,9 @@ export default class Board {
 
   move(x: number, y: number, toX: number, toY: number): void {
     console.log('move', { x, y, toX, toY });
+    if (this._mustPromote) {
+      throw new Error("Can't move because a pawn is awaiting for promotion");
+    }
     const piece: PieceState = this.getPiece(x, y);
     if (!piece) {
       throw new Error(`No piece found in ${x},${y}`);
