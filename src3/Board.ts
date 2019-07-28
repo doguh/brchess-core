@@ -24,6 +24,7 @@ export default class Board {
   private _winner: Color = undefined;
   private _history: StateHistory<BoardState>;
   private _piecesLeft: number[] = [0, 0];
+  private _mustPromote: PieceState | null = null;
 
   constructor(state: BoardState = null) {
     const len = WIDTH * HEIGHT;
@@ -66,6 +67,10 @@ export default class Board {
     return this._winner;
   }
 
+  get mustBePromoted(): PieceState | null {
+    return this._mustPromote;
+  }
+
   get history(): StateHistory<BoardState> {
     return this._history;
   }
@@ -76,6 +81,8 @@ export default class Board {
 
   private onStateChange = (nextState: BoardState) => {
     console.log('setState');
+    this._mustPromote = null;
+
     // demap old state positions
     if (this.state) {
       this.state.pieces.forEach(p => (this.getSquare(p.x, p.y).piece = null));
@@ -85,6 +92,11 @@ export default class Board {
     nextState.pieces.forEach(p => {
       this.getSquare(p.x, p.y).piece = p;
       this._piecesLeft[p.color]++;
+
+      // si on a un pion sur la derniere ligne, il doit être promu
+      if (p.type === Pawn.key && p.y === (p.color === White ? 7 : 0)) {
+        this._mustPromote = p;
+      }
     });
 
     this.state = nextState;
@@ -111,6 +123,7 @@ export default class Board {
 
     // TODO maybe dispatch win event
     // TODO maybe dispatch check event
+    // TODO maybe dispatch promote event
   };
 
   getState(): BoardState {
@@ -172,23 +185,14 @@ export default class Board {
     // TODO maybe dispatch move and kill events
   }
 
-  promote(x: number, y: number, newType: PieceType = Queen): void {
-    console.log('promote', { x, y, to: newType.key });
-    if (!newType.canPromote) {
-      throw new Error("A pawn can't be promoted to this type");
-    }
-    const piece: PieceState = this.getPiece(x, y);
+  promote(newType: PieceType = Queen): void {
+    console.log('promote to', newType.key);
+    const piece: PieceState = this._mustPromote;
     if (!piece) {
-      throw new Error(`No piece found in ${x},${y}`);
+      throw new Error('No pawn can be promoted right now');
     }
-    if (piece.type !== Pawn.key) {
-      throw new Error('Only a pawn can be promoted');
-    }
-    if (
-      (piece.color === White && y !== 7) ||
-      (piece.color === Black && y !== 0)
-    ) {
-      throw new Error('Pawn must be on the last rank to be promoted');
+    if (!newType.canPromote) {
+      throw new Error('Invalid new piece type for promotion');
     }
 
     this.setState({
@@ -199,7 +203,7 @@ export default class Board {
       }),
     });
 
-    // TODO maybe promoted event
+    // TODO maybe dispatch promoted event
   }
 
   getLegalMoves(): MovesList[] {
