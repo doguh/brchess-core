@@ -157,7 +157,9 @@ export default class Board {
     // si il y a une piece sur la case d'arrivée, elle est tuée
     const killed: PieceState = this.getPiece(toX, toY);
 
+    const curTurn: number = this.state.turn || 1;
     this.setState({
+      turn: this.state.whoseTurn === Black ? curTurn + 1 : curTurn,
       whoseTurn: this.state.whoseTurn === White ? Black : White,
       pieces: reducePieces(
         this.state.pieces,

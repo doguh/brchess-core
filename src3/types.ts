@@ -3,6 +3,7 @@ export type PieceState = { type: string; color: Color; x: number; y: number };
 export type BoardState = {
   whoseTurn: Color;
   pieces: PieceState[];
+  turn?: number;
 };
 
 export type Square = {
