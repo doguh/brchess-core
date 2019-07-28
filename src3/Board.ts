@@ -8,7 +8,7 @@ import {
   Movement,
   FlatMovesList,
 } from './types';
-import { getPieceType } from './pieces';
+import { getPieceType, Queen, Pawn, King } from './pieces';
 import { StateHistory } from 'state-history';
 import { White, Black, WIDTH, HEIGHT } from './constantes';
 
@@ -159,10 +159,42 @@ export default class Board {
 
     this.setState({
       whoseTurn: this.state.whoseTurn === White ? Black : White,
-      pieces: reducePieces(this.state.pieces, piece, toX, toY, killed),
+      pieces: reducePieces(
+        this.state.pieces,
+        piece,
+        { ...piece, x: toX, y: toY },
+        killed
+      ),
     });
 
     // TODO maybe dispatch move and kill events
+  }
+
+  promote(x: number, y: number, newType: PieceType = Queen): void {
+    console.log('promote', { x, y, to: newType.key });
+    const piece: PieceState = this.getPiece(x, y);
+    if (!piece) {
+      throw new Error(`No piece found in ${x},${y}`);
+    }
+    if (piece.type !== Pawn.key) {
+      throw new Error('Only a pawn can be promoted');
+    }
+    if (
+      (piece.color === White && y !== 7) ||
+      (piece.color === Black && y !== 0)
+    ) {
+      throw new Error('Pawn must be on the last rank to be promoted');
+    }
+
+    this.setState({
+      ...this.state,
+      pieces: reducePieces(this.state.pieces, piece, {
+        ...piece,
+        type: newType.key,
+      }),
+    });
+
+    // TODO maybe promoted event
   }
 
   getLegalMoves(): MovesList[] {
@@ -214,8 +246,7 @@ export default class Board {
               pieces: reducePieces(
                 this.state.pieces,
                 piece,
-                hypothetic.x,
-                hypothetic.y,
+                { ...piece, x: hypothetic.x, y: hypothetic.y },
                 hypothetic.piece
               ),
             });
@@ -287,31 +318,24 @@ function flatMovesList(list: MovesList[]): FlatMovesList {
 
 /**
  * retourne une copie du tableau `pieces`
- * en créant un nouvel objet à la place de `piece`
- * avec `x` et `y` mis à jour et en supprimant `remove` du tableau
+ * en remplaçant `piece` par `newState`
+ * et en supprimant `remove` de la liste
  * @param pieces
  * @param piece
- * @param newX
- * @param newY
+ * @param newState
  * @param remove
  */
 function reducePieces(
   pieces: PieceState[],
   piece: PieceState,
-  newX: number,
-  newY: number,
+  newState: PieceState,
   remove: PieceState = null
 ): PieceState[] {
   return pieces.reduce<PieceState[]>(
     (acc: PieceState[], p: PieceState): PieceState[] => {
       if (p === piece) {
         // si c'est la piece dont il faut modifier la position
-        acc.push({
-          type: p.type,
-          color: p.color,
-          x: newX,
-          y: newY,
-        });
+        acc.push(newState);
       } else if (p !== remove) {
         // on retire de la liste la piece tuée
         acc.push(p);
@@ -372,7 +396,7 @@ export function testCheck(state: {
           (hypothetic: Square): true | void => {
             if (
               hypothetic.piece &&
-              hypothetic.piece.type === 'k' &&
+              hypothetic.piece.type === King.key &&
               hypothetic.piece.color === whoseKing
             ) {
               return true;

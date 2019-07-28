@@ -1,5 +1,6 @@
 import { BoardState, Color, PieceState } from './types';
 import { White, Black } from './constantes';
+import { King, Queen, Bishop, Knight, Rook, Pawn } from './pieces';
 
 export default function getDefaultBoardState(): BoardState {
   const botColor: Color = White;
@@ -11,97 +12,97 @@ export default function getDefaultBoardState(): BoardState {
        * bottom
        */
       {
-        type: 'r',
+        type: Rook.key,
         x: 0,
         y: 0,
         color: botColor,
       },
       {
-        type: 'n',
+        type: Knight.key,
         x: 1,
         y: 0,
         color: botColor,
       },
       {
-        type: 'b',
+        type: Bishop.key,
         x: 2,
         y: 0,
         color: botColor,
       },
       {
-        type: botColor === White ? 'k' : 'q',
+        type: botColor === White ? King.key : Queen.key,
         x: 3,
         y: 0,
         color: botColor,
       },
       {
-        type: botColor === White ? 'q' : 'k',
+        type: botColor === White ? Queen.key : King.key,
         x: 4,
         y: 0,
         color: botColor,
       },
       {
-        type: 'b',
+        type: Bishop.key,
         x: 5,
         y: 0,
         color: botColor,
       },
       {
-        type: 'n',
+        type: Knight.key,
         x: 6,
         y: 0,
         color: botColor,
       },
       {
-        type: 'r',
+        type: Rook.key,
         x: 7,
         y: 0,
         color: botColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 0,
         y: 1,
         color: botColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 1,
         y: 1,
         color: botColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 2,
         y: 1,
         color: botColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 3,
         y: 1,
         color: botColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 4,
         y: 1,
         color: botColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 5,
         y: 1,
         color: botColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 6,
         y: 1,
         color: botColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 7,
         y: 1,
         color: botColor,
@@ -110,97 +111,97 @@ export default function getDefaultBoardState(): BoardState {
        * top
        */
       {
-        type: 'r',
+        type: Rook.key,
         x: 0,
         y: 7,
         color: topColor,
       },
       {
-        type: 'n',
+        type: Knight.key,
         x: 1,
         y: 7,
         color: topColor,
       },
       {
-        type: 'b',
+        type: Bishop.key,
         x: 2,
         y: 7,
         color: topColor,
       },
       {
-        type: botColor === White ? 'k' : 'q',
+        type: botColor === White ? King.key : Queen.key,
         x: 3,
         y: 7,
         color: topColor,
       },
       {
-        type: botColor === White ? 'q' : 'k',
+        type: botColor === White ? Queen.key : King.key,
         x: 4,
         y: 7,
         color: topColor,
       },
       {
-        type: 'b',
+        type: Bishop.key,
         x: 5,
         y: 7,
         color: topColor,
       },
       {
-        type: 'n',
+        type: Knight.key,
         x: 6,
         y: 7,
         color: topColor,
       },
       {
-        type: 'r',
+        type: Rook.key,
         x: 7,
         y: 7,
         color: topColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 0,
         y: 6,
         color: topColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 1,
         y: 6,
         color: topColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 2,
         y: 6,
         color: topColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 3,
         y: 6,
         color: topColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 4,
         y: 6,
         color: topColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 5,
         y: 6,
         color: topColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 6,
         y: 6,
         color: topColor,
       },
       {
-        type: '',
+        type: Pawn.key,
         x: 7,
         y: 6,
         color: topColor,
@@ -222,7 +223,7 @@ export function getRandomBoardState(): BoardState {
   let whiteBishop: number = -1;
   let blackBishop: number = -1;
   state.pieces.forEach(piece => {
-    if (piece.type === 'b') {
+    if (piece.type === Bishop.key) {
       const color: number = piece.x % 2 === piece.y % 2 ? 0 : 1;
       const matesColor: number =
         piece.color === White ? whiteBishop : blackBishop;
