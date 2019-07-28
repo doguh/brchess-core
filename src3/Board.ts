@@ -173,6 +173,10 @@ export default class Board {
     // si il y a une piece sur la case d'arrivée, elle est tuée
     const killed: PieceState = this.getPiece(toX, toY);
 
+    if (killed && killed.type === King.key) {
+      throw new Error("King shouldn't get killed");
+    }
+
     const curTurn: number = this.state.turn || 1;
     this.setState({
       turn: this.state.whoseTurn === Black ? curTurn + 1 : curTurn,
