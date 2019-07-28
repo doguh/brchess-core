@@ -115,7 +115,7 @@ export default class Board {
         pieces: this.state.pieces,
       });
 
-    if (!this._isWin) {
+    if (!this._isWin && !this._mustPromote) {
       this.invalidatePossibleMoves();
     } else {
       this.possibleMoves = this.mandatoryMoves = [];
