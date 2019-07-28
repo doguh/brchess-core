@@ -269,7 +269,14 @@ export default class Board {
 
             if (hypothetic.piece) {
               // case occupée par un ennemi, mouvement obligatoire
-              if (!willCheck) mandatoryDest.push(hypothetic);
+              // sauf si :
+              // - aller ici nous mettrait en échec
+              // - la piece sur la case ciblée est le roi ennemi
+              // (permet d'empecher de tuer le roi noir dès le premier
+              // tour si il se trouvait en échec à cause des placements initiaux)
+              if (!willCheck && hypothetic.piece.type !== King.key) {
+                mandatoryDest.push(hypothetic);
+              }
               return;
             }
             // case libre
