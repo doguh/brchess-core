@@ -172,6 +172,9 @@ export default class Board {
 
   promote(x: number, y: number, newType: PieceType = Queen): void {
     console.log('promote', { x, y, to: newType.key });
+    if (!newType.canPromote) {
+      throw new Error("A pawn can't be promoted to this type");
+    }
     const piece: PieceState = this.getPiece(x, y);
     if (!piece) {
       throw new Error(`No piece found in ${x},${y}`);

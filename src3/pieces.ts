@@ -47,6 +47,7 @@ export const Queen = registerPieceType({
     makeMove(-1, 1, 8),
     makeMove(-1, -1, 8),
   ],
+  canPromote: true,
 });
 
 export const Bishop = registerPieceType({
@@ -57,6 +58,7 @@ export const Bishop = registerPieceType({
     makeMove(-1, 1, 8),
     makeMove(-1, -1, 8),
   ],
+  canPromote: true,
 });
 
 export const Knight = registerPieceType({
@@ -71,6 +73,7 @@ export const Knight = registerPieceType({
     makeMove(2, 1),
     makeMove(2, -1),
   ],
+  canPromote: true,
 });
 
 export const Rook = registerPieceType({
@@ -81,6 +84,7 @@ export const Rook = registerPieceType({
     makeMove(0, -1, 8),
     makeMove(-1, 0, 8),
   ],
+  canPromote: true,
 });
 
 const canPawnDoubleMove = (from: Square): boolean => {

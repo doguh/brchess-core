@@ -34,6 +34,7 @@ export type Movement = {
 export type PieceType = {
   key: string;
   movements: Movement[];
+  canPromote?: boolean;
 };
 
 export type MovesList = {
