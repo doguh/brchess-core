@@ -1,5 +1,7 @@
 import Board from './Board';
 import { Color, BoardState } from './types';
+import { King, Pawn } from './pieces';
+import { HEIGHT, White } from './constantes';
 
 const virtualBoard: Board = new Board();
 virtualBoard.history.maxLength = 0;
@@ -34,6 +36,16 @@ export default class AI {
 
   private move(state: BoardState) {
     console.log('AI find best move...');
+    let numPieces: number = 0;
+    let numEnnemies: number = 0;
+    state.pieces.forEach(piece => {
+      if (piece.color === this.color) {
+        numPieces++;
+      } else {
+        numEnnemies++;
+      }
+    });
+
     const moves = this.board.getLegalMovesFlat();
     let bestMove: {
       x: number;
@@ -41,15 +53,31 @@ export default class AI {
       toX: number;
       toY: number;
     } = null;
-    let bestScore = 0;
+    let bestScore = -Infinity;
+
     moves.forEach(move => {
       virtualBoard.setState(state);
+      const piece = virtualBoard.getPiece(move.x, move.y);
       virtualBoard.move(move.x, move.y, move.toX, move.toY);
       const ennemyMoves = virtualBoard.getLegalMovesFlat();
       const mustKill =
         ennemyMoves.length &&
         !!virtualBoard.getPiece(ennemyMoves[0].toX, ennemyMoves[0].toY);
-      const score = (mustKill ? 1000 : 100) - ennemyMoves.length;
+
+      let score: number = 100;
+      if (mustKill) {
+        score += 100;
+      }
+      if (numEnnemies > 4) {
+        score -= ennemyMoves.length;
+      }
+      if (numPieces <= 4 && piece.type === King.key) {
+        score -= 50;
+      }
+      if (piece.type === Pawn.key) {
+        score += piece.color === White ? piece.y : HEIGHT - piece.y - 1;
+      }
+
       if (score >= bestScore) {
         bestMove = move;
         bestScore = score;
