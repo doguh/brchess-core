@@ -11,3 +11,4 @@ export {
   Pawn,
 } from './pieces';
 export { White, Black, WIDTH, HEIGHT } from './constantes';
+export { default as AI } from './AI';
