@@ -1,6 +1,6 @@
 import Board from './Board';
-import { Color, BoardState } from './types';
-import { King, Pawn } from './pieces';
+import { Color, BoardState, PieceType, PieceState } from './types';
+import { King, Pawn, types } from './pieces';
 import { HEIGHT, White } from './constantes';
 
 const virtualBoard: Board = new Board();
@@ -68,10 +68,10 @@ export default class AI {
       if (mustKill) {
         score += 100;
       }
-      if (numEnnemies > 4) {
+      if (numEnnemies > 6) {
         score -= ennemyMoves.length;
       }
-      if (numPieces <= 4 && piece.type === King.key) {
+      if (numPieces <= 6 && piece.type === King.key) {
         score -= 50;
       }
       if (piece.type === Pawn.key) {
@@ -88,11 +88,65 @@ export default class AI {
         this.board.move(bestMove.x, bestMove.y, bestMove.toX, bestMove.toY)
       );
     }
-    console.log('AI found best move:', bestMove);
+    console.log('AI found best move:', bestMove, bestScore);
   }
 
   private promote(state: BoardState) {
-    this.board.promote();
+    console.log('AI find best promote');
+    const toPromote: PieceState = this.board.mustBePromoted;
+    let bestType: PieceType;
+    let bestScore: number = -Infinity;
+
+    Object.keys(types).forEach(key => {
+      const type: PieceType = types[key];
+      if (type.canPromote) {
+        let score = 100;
+
+        virtualBoard.setState(state);
+        virtualBoard.promote(type);
+        const newState = virtualBoard.getState();
+
+        const ennemyMoves = virtualBoard.getLegalMovesFlat();
+
+        let willNeedToKill: boolean = false;
+        let minNumPossibleMoves: number = Infinity;
+        ennemyMoves.forEach(move => {
+          virtualBoard.setState(newState);
+          virtualBoard.move(move.x, move.y, move.toX, move.toY);
+          if (virtualBoard.mustBePromoted) {
+            virtualBoard.promote();
+          }
+          const possibleMoves = virtualBoard.getLegalMovesFlat();
+          if (possibleMoves.length < minNumPossibleMoves) {
+            minNumPossibleMoves = possibleMoves.length;
+          }
+          possibleMoves.forEach(myMove => {
+            if (
+              myMove.x === toPromote.x &&
+              myMove.y === toPromote.y &&
+              virtualBoard.getPiece(myMove.toX, myMove.toY)
+            ) {
+              willNeedToKill = true;
+            }
+          });
+        });
+
+        score += minNumPossibleMoves;
+
+        if (willNeedToKill) {
+          score -= 50;
+        }
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestType = type;
+        }
+      }
+    });
+
+    console.log('AI found best promote:', bestType.key, bestScore);
+
+    this.board.promote(bestType);
   }
 
   private delayAction(fn: () => any) {

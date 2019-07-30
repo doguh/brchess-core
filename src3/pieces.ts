@@ -1,7 +1,7 @@
 import { PieceType, MovementCondition, Square } from './types';
 import { White } from './constantes';
 
-const types: { [key: string]: PieceType } = {};
+export const types: { [key: string]: PieceType } = {};
 
 export function registerPieceType(t: PieceType): PieceType {
   types[t.key] = t;
