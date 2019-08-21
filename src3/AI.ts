@@ -78,6 +78,31 @@ export default class AI {
         score += piece.color === White ? piece.y : HEIGHT - piece.y - 1;
       }
 
+      const newState = virtualBoard.getState();
+      let willNeedToKill: boolean = false;
+      let minNumPossibleMoves: number = Infinity;
+      ennemyMoves.forEach(move => {
+        virtualBoard.setState(newState);
+        virtualBoard.move(move.x, move.y, move.toX, move.toY);
+        if (virtualBoard.mustBePromoted) {
+          virtualBoard.promote();
+        }
+        const possibleMoves = virtualBoard.getLegalMovesFlat();
+        if (possibleMoves.length < minNumPossibleMoves) {
+          minNumPossibleMoves = possibleMoves.length;
+        }
+        willNeedToKill = possibleMoves.some(myMove => {
+          if (virtualBoard.getPiece(myMove.toX, myMove.toY)) {
+            return true;
+          }
+        });
+      });
+
+      score += minNumPossibleMoves;
+      if (willNeedToKill) {
+        score -= 50;
+      }
+
       if (score >= bestScore) {
         bestMove = move;
         bestScore = score;
